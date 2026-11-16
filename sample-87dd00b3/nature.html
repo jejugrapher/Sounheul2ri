@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자연·관광지 | 선흘2리</title>
+<meta name="description" content="거문오름 탐방 예약·시간·요금·코스와 제주세계자연유산센터, 선흘2리의 오름과 볼거리.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="자연·관광지 | 선흘2리">
+<meta property="og:description" content="거문오름 탐방 예약·시간·요금·코스와 제주세계자연유산센터, 선흘2리의 오름과 볼거리.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta property="og:image" content="assets/img/og_village.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1C3A2C">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<main id="main">
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow">Nature</p>
+  <h1>자연·관광지</h1>
+  <p class="lead">운영 시간과 요금은 바뀔 수 있습니다. 각 항목의 확인 날짜를 보시고, 방문 전에 공식 안내를 한 번 더 확인해 주세요.</p>
+</div></div>
+<section><div class="wrap">
+  <div id="map" aria-label="선흘2리 지도"></div>
+  <p class="note" style="margin-top:8px">더 많은 장소는 <a href="https://jajumap.com/town/seonheul2/" target="_blank" rel="noopener">선흘2리 마을지도</a>에서 볼 수 있습니다.</p>
+</div></section>
+<section class="alt"><div class="wrap">
+  <div class="chips" id="chips" role="group" aria-label="분류"></div>
+  <div id="list" style="display:grid;gap:18px"></div>
+</div></section>
+</main>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script src="assets/js/common.js?v=20261116r"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261116r" defer></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+SH2.init(function () {
+  var E = SH2.esc;
+  SH2.getJSON("data/places.json").then(function (d) {
+    var cats = [{ key: "all", label: "전체" }].concat(d.categories.filter(function (c) { return d.places.some(function (p) { return p.cat === c.key; }); }));
+    var label = {}; d.categories.forEach(function (c) { label[c.key] = c.label; });
+    var cur = "all", markers = {};
+    var map = L.map("map", { scrollWheelZoom: false }).setView([33.470, 126.705], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "&copy; OpenStreetMap" }).addTo(map);
+    d.places.forEach(function (p) {
+      if (typeof p.lat !== "number") return;
+      markers[p.id] = L.marker([p.lat, p.lng]).addTo(map).bindPopup("<b>" + E(p.name) + '</b><br><a href="#' + E(p.id) + '">자세히 보기</a>');
+    });
+    var pts = d.places.filter(function (p) { return typeof p.lat === "number"; }).map(function (p) { return [p.lat, p.lng]; });
+    if (pts.length > 1) map.fitBounds(pts, { padding: [40, 40], maxZoom: 15 });
+    function draw() {
+      SH2.el("chips").innerHTML = cats.map(function (c) { return '<button class="chip" aria-pressed="' + (c.key === cur) + '" data-cat="' + c.key + '">' + E(c.label) + "</button>"; }).join("");
+      SH2.el("list").innerHTML = d.places.filter(function (p) { return cur === "all" || p.cat === cur; }).map(function (p) {
+        var facts = (p.facts || []).map(function (f) { return "<tr><th>" + E(f[0]) + "</th><td>" + E(f[1]) + "</td></tr>"; }).join("");
+        var src = (p.src || []).map(function (s) { return '<a href="' + E(SH2.safeUrl(s.url)) + '" target="_blank" rel="noopener">' + E(s.label) + "</a>"; }).join(", ");
+        var pic = SH2.safeUrl(p.img);
+        return '<article class="card place' + (pic ? " has-pic" : "") + '" id="' + E(p.id) + '">' +
+          (pic ? '<figure class="place-pic"><img src="' + E(pic) + '" alt="' + E(p.alt || p.name) + '" loading="lazy">' + (p.credit ? "<figcaption>사진: " + E(p.credit) + "</figcaption>" : "") + "</figure>" : "") + '<div class="place-body">' +
+          '<span class="tag">' + E(label[p.cat] || "") + "</span><h2 style=\"font-size:1.35rem\">" + E(p.name) + "</h2>" +
+          (p.address ? '<p class="note">' + E(p.address) + "</p>" : "") + '<p class="meta" style="font-size:1rem">' + E(p.desc) + "</p>" +
+          (facts ? '<table class="facts">' + facts + "</table>" : "") +
+          '<div class="btn-row" style="margin-top:10px">' + (p.official && SH2.safeUrl(p.official.url) ? '<a class="btn small" href="' + E(SH2.safeUrl(p.official.url)) + '"' + (/^https?:/.test(p.official.url) ? ' target="_blank" rel="noopener"' : "") + ">" + E(p.official.label) + "</a>" : "") +
+          (markers[p.id] ? '<button class="btn small line" data-map="' + E(p.id) + '">지도에서 보기</button>' : "") + "</div>" +
+          '<p class="src">' + (p.checked ? E(p.checked.replace(/-/g, ".")) + " 확인" : "") + (src ? " · 자료: " + src : "") + "</p>" +
+          "</div></article>";
+      }).join("");
+    }
+    draw();
+    SH2.el("chips").addEventListener("click", function (e) { var b = e.target.closest("[data-cat]"); if (b) { cur = b.getAttribute("data-cat"); draw(); } });
+    SH2.el("list").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-map]"); if (!b) return;
+      var m = markers[b.getAttribute("data-map")];
+      SH2.el("map").scrollIntoView({ behavior: "smooth", block: "center" });
+      map.setView(m.getLatLng(), 15); m.openPopup();
+    });
+    if (location.hash) { var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }
+  });
+});
+</script>
+</body>
+</html>

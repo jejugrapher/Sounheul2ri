@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>행사 준비 공유 — 선흘2리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<div class="admin">
+  <a class="more" href="index.html">← 홈페이지로</a>
+  <h1>행사 준비 공유</h1>
+  <p class="note">행사를 준비하는 분들이 할 일과 일정, 준비물을 함께 보고 고치는 곳입니다.</p>
+  <div class="panel" id="noApi" hidden><p>아직 저장소가 연결되지 않아 이 화면을 쓸 수 없습니다.</p></div>
+  <div class="panel" id="login">
+    <h2>들어가기</h2>
+    <form id="loginForm"><div class="field"><label for="skey">관계자 비밀번호</label><input type="password" id="skey" autocomplete="current-password"></div><button class="btn" type="submit">들어가기</button></form>
+  </div>
+  <div id="app" hidden>
+    <div class="panel">
+      <div class="field"><label for="ev">행사 고르기</label><select id="ev"></select></div>
+      <div class="pair"><div class="field"><label for="who">고친 사람(이름이나 직책)</label><input id="who" maxlength="40" placeholder="예) 사무장"></div><div class="field"><label>마지막 저장</label><p class="note" id="updated" style="padding-top:12px">—</p></div></div>
+      <div class="row-actions" style="margin-top:0"><button class="btn" id="saveTop">모두 저장하기</button><a class="btn line" id="toReport" href="#">보고서 보기</a><button class="btn line" id="logout">나가기</button></div>
+    </div>
+    <div class="panel flow" id="flow"></div>
+    <div id="lists"></div>
+    <div class="row-actions"><button class="btn" id="saveBottom">모두 저장하기</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script>
+(function () {
+  "use strict";
+  var API = (window.SH2_CONFIG || {}).api || "";
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function toast(m) { var t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove("show"); }, 2600); }
+  function post(body) {
+    return fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), redirect: "follow" })
+      .then(function (r) { return r.json(); }).then(function (d) { if (!d.ok) throw new Error(d.error === "auth" ? "비밀번호가 맞지 않습니다" : (d.error || "처리하지 못했습니다")); return d; });
+  }
+  /* 관계자 비밀번호(준비 공유에서 들어온 값) 또는 관리자 비밀번호(관리자 페이지에서 들어온 값) */
+  function creds() { var o = {}; try { var s = sessionStorage.getItem("sh2-staff"), k = sessionStorage.getItem("sh2-admin"); if (s) o.skey = s; if (k) o.key = k; } catch (e) {} return o; }
+  function call(body) { var c = creds(); for (var k in c) body[k] = c[k]; return post(body); }
+  function qid() { return new URLSearchParams(location.search).get("e") || ""; }
+  function when(e) { return e.start ? e.start + (e.end && e.end !== e.start ? " ~ " + e.end : "") : (e.usual || "날짜 미정"); }
+
+  var LISTS = [
+    { k: "todos", h: "할 일", hint: "누가 언제까지 무엇을 하는지 적고, 끝나면 표시합니다.", cols: [["done", "끝", "check"], ["text", "할 일", "text"], ["owner", "담당", "short"], ["due", "마감", "date"]] },
+    { k: "timeline", h: "당일 시간표", hint: "행사 당일 시간 순서대로 적습니다.", cols: [["time", "시간", "short"], ["text", "내용", "text"], ["owner", "담당", "short"]] },
+    { k: "supplies", h: "준비물", hint: "챙길 물건과 수량, 가져올 사람을 적습니다.", cols: [["done", "챙김", "check"], ["item", "품목", "text"], ["qty", "수량", "short"], ["owner", "가져올 사람", "short"]] },
+    { k: "budget", h: "예산", hint: "계획한 금액과 실제 쓴 금액을 원 단위 숫자로 적습니다.", cols: [["item", "항목", "text"], ["plan", "계획(원)", "num"], ["actual", "실제(원)", "num"]] },
+    { k: "links", h: "자료", hint: "공문·계획서·사진첩 같은 자료의 주소를 모아 둡니다.", cols: [["label", "이름", "text"], ["url", "주소(https://…)", "text"]] },
+    { k: "memos", h: "메모·결정", hint: "회의에서 정한 것, 서로 알릴 것을 적습니다.", cols: [["date", "날짜", "date"], ["who", "누가", "short"], ["text", "내용", "text"]] }
+  ];
+  var PREP = {}, EVENTS = [], CUR = "", DIRTY = false;
+  if (!API) { $("noApi").hidden = false; $("login").hidden = true; }
+  function show(on) { $("login").hidden = on; $("app").hidden = !on; }
+  function start() {
+    return call({ mode: "staff_login" }).then(function (d) {
+      EVENTS = d.events || [];
+      var t = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+      var up = EVENTS.filter(function (e) { return e.start && (e.end || e.start) >= t; }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+      var rest = EVENTS.filter(function (e) { return up.indexOf(e) < 0; }).sort(function (a, b) { return (a.start || "0") > (b.start || "0") ? -1 : 1; });
+      $("ev").innerHTML = up.concat(rest).map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.title) + " · " + esc(when(e)) + (e.hidden ? " (숨김)" : "") + "</option>"; }).join("");
+      var want = qid(); if (want && EVENTS.some(function (e) { return e.id === want; })) $("ev").value = want;
+      show(true); return load($("ev").value);
+    });
+  }
+  function load(id) {
+    CUR = id;
+    return call({ mode: "prep_get", id: id }).then(function (d) {
+      PREP = d.prep || {}; LISTS.forEach(function (L) { PREP[L.k] = PREP[L.k] || []; });
+      $("updated").textContent = PREP.updated ? PREP.updated + (PREP.updated_by ? " · " + PREP.updated_by : "") : "아직 저장한 적이 없습니다";
+      $("toReport").href = "report.html?e=" + encodeURIComponent(id);
+      var o = d.ops || {}, td = PREP.todos, done = td.filter(function (x) { return x.done; }).length;
+      $("flow").innerHTML = "<h2>" + esc(d.event.title) + '</h2><p class="note">' + esc(when(d.event)) + (d.event.place ? " · " + esc(d.event.place) : "") + "</p>" +
+        '<ol class="steps"><li class="on">준비 <small>할 일 ' + done + "/" + td.length + '</small></li><li class="' + (d.event.hidden ? "" : "on") + '">홍보 <small>' + (d.event.hidden ? "숨김" : "공개 중") + '</small></li><li class="' + (o.attendance ? "on" : "") + '">진행 <small>' + (o.attendance ? "참가 " + esc(o.attendance) + "명" : "인원 미입력") + '</small></li><li class="' + (o.survey_open ? "on" : "") + '">만족도 조사 <small>' + (o.survey_open ? "받는 중" : "닫힘") + '</small></li><li>보고서</li></ol>';
+      draw(); DIRTY = false;
+    });
+  }
+  function cell(L, i, c, row) {
+    var v = row[c[0]], a = ' data-l="' + L.k + '" data-i="' + i + '" data-c="' + c[0] + '" aria-label="' + esc(c[1]) + '"';
+    if (c[2] === "check") return '<label class="ck"><input type="checkbox"' + a + (v ? " checked" : "") + "><span>" + esc(c[1]) + "</span></label>";
+    if (c[2] === "date") return '<input type="date"' + a + ' value="' + esc(v || "") + '">';
+    if (c[2] === "num") return '<input inputmode="numeric"' + a + ' value="' + esc(v || "") + '" placeholder="' + esc(c[1]) + '">';
+    return '<input' + a + ' value="' + esc(v || "") + '" placeholder="' + esc(c[1]) + '"' + (c[2] === "short" ? ' class="short"' : "") + ">";
+  }
+  function draw() {
+    $("lists").innerHTML = LISTS.map(function (L) {
+      var rows = PREP[L.k].map(function (row, i) {
+        return '<div class="prow' + (row.done ? " done" : "") + '">' + L.cols.map(function (c) { return cell(L, i, c, row); }).join("") + '<button class="share-btn" data-del="' + L.k + ":" + i + '" aria-label="이 줄 지우기">지우기</button></div>';
+      }).join("");
+      var sum = "";
+      if (L.k === "budget") { var p = 0, a = 0; PREP.budget.forEach(function (r) { p += +String(r.plan).replace(/\D/g, "") || 0; a += +String(r.actual).replace(/\D/g, "") || 0; }); sum = '<p class="note" style="margin-top:8px">합계 — 계획 ' + p.toLocaleString() + "원 · 실제 " + a.toLocaleString() + "원</p>"; }
+      return '<div class="panel"><h2>' + L.h + '</h2><p class="note" style="margin-bottom:10px">' + L.hint + "</p>" + (rows || '<p class="note">아직 적은 것이 없습니다.</p>') + sum + '<div class="row-actions"><button class="btn small line" data-add="' + L.k + '">+ 줄 더하기</button></div></div>';
+    }).join("");
+  }
+  $("lists").addEventListener("input", function (e) {
+    var t = e.target, l = t.getAttribute("data-l"); if (!l) return;
+    PREP[l][+t.getAttribute("data-i")][t.getAttribute("data-c")] = t.type === "checkbox" ? t.checked : t.value; DIRTY = true;
+    if (t.type === "checkbox") t.closest(".prow").classList.toggle("done", t.checked);
+  });
+  $("lists").addEventListener("click", function (e) {
+    var a = e.target.closest("[data-add]"), d = e.target.closest("[data-del]");
+    if (a) { var k = a.getAttribute("data-add"), row = {}; if (k === "memos") { row.date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date()); row.who = $("who").value; } PREP[k].push(row); DIRTY = true; draw(); }
+    if (d) { var p = d.getAttribute("data-del").split(":"); PREP[p[0]].splice(+p[1], 1); DIRTY = true; draw(); }
+  });
+  function saveAll() {
+    try { localStorage.setItem("sh2-who", $("who").value); } catch (e) {}
+    var body = {}; LISTS.forEach(function (L) { body[L.k] = PREP[L.k]; });
+    call({ mode: "prep_save", id: CUR, prep: body, who: $("who").value }).then(function () { toast("저장했습니다"); return load(CUR); }).catch(function (e) { toast(e.message); });
+  }
+  $("saveTop").onclick = saveAll; $("saveBottom").onclick = saveAll;
+  $("ev").addEventListener("change", function () { if (DIRTY && !confirm("저장하지 않은 내용이 있습니다. 다른 행사로 넘어갈까요?")) { $("ev").value = CUR; return; } load($("ev").value).catch(function (e) { toast(e.message); }); });
+  $("logout").onclick = function () { try { sessionStorage.removeItem("sh2-staff"); } catch (e) {} location.reload(); };
+  window.addEventListener("beforeunload", function (e) { if (DIRTY) { e.preventDefault(); e.returnValue = ""; } });
+  $("loginForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    try { sessionStorage.setItem("sh2-staff", $("skey").value); } catch (e) {}
+    start().catch(function (e) { try { sessionStorage.removeItem("sh2-staff"); } catch (x) {} toast(e.message); });
+  });
+  try { $("who").value = localStorage.getItem("sh2-who") || ""; } catch (e) {}
+  var c = creds(); if (API && (c.skey || c.key)) start().catch(function () {});
+})();
+</script>
+</body>
+</html>

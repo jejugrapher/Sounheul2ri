@@ -1,0 +1,346 @@
+{
+  "updated": "2026-11-16",
+  "events": [
+    {
+      "id": "2026-heritage-festival",
+      "title": "2026 세계유산축전 — 제주 화산섬과 용암동굴",
+      "start": "2026-10-03",
+      "end": "2026-10-18",
+      "time": "",
+      "place": "거문오름용암동굴계·한라산·성산일출봉과 7개 세계자연유산마을",
+      "address": "",
+      "host": "국가유산청·제주특별자치도 주최 / 국가유산진흥원·(사)제주유산마을미래가치연구원 주관",
+      "contact": "",
+      "fee": "",
+      "category": "세계유산축전",
+      "summary": "'유산! 그 너머로'를 주제로 세계자연유산을 걷고 체험한 축전입니다. 선흘2리를 비롯한 7개 세계자연유산마을에서는 주민들이 직접 '유산마을 이야기' 프로그램을 운영했습니다.",
+      "program": [
+        "워킹투어 (거문오름 → 월정리 해변)",
+        "세계자연유산 특별탐험대",
+        "만장굴 전 구간 탐험대",
+        "세계유산 탐험버스",
+        "별빛산행 일출투어",
+        "숨길 원정대 (5박 6일)",
+        "7개 세계자연유산마을의 '유산마을 이야기'",
+        "특별기획전 「제주의 시간, 세계의 유산으로」 (제주세계자연유산센터 기획전시실, 8월 31일~10월 18일)"
+      ],
+      "poster": "assets/img/ev_2026_whf_poster.jpg",
+      "photos": [
+        "assets/img/ev_2026_whf_1.jpg",
+        "assets/img/ev_2026_whf_2.jpg"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "세계유산축전 제주 공식 사이트",
+          "url": "https://worldheritage.kr/80"
+        },
+        {
+          "label": "제주특별자치도 보도자료 2026.10.19.",
+          "url": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=2038401"
+        }
+      ],
+      "source": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=2038401",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "2026-insect-festival",
+      "title": "생태마을 곤충대축제",
+      "start": "2026-10-09",
+      "end": "",
+      "time": "",
+      "place": "선흘2리 (거점: 곶자왈 거문오름 펜션)",
+      "address": "",
+      "host": "2026 세계유산축전 '유산마을 이야기' — 선흘2리",
+      "contact": "",
+      "fee": "팀당 10,000원 (15팀, 팀당 최대 4명)",
+      "category": "마을 축제",
+      "summary": "2026 세계유산축전 기간에 선흘2리가 마련한 '유산마을 이야기' 프로그램입니다. 미리 예약한 15팀(팀당 최대 4명)이 참가했습니다.",
+      "program": [],
+      "poster": "",
+      "photos": [
+        "assets/img/fl_ill_insect_table.jpg"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "세계유산축전 유산마을 이야기",
+          "url": "https://worldheritage.kr/80"
+        }
+      ],
+      "source": "https://worldheritage.kr/80",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "2026-geomun-trekking",
+      "title": "제17회 세계자연유산 거문오름 트레킹",
+      "start": "2026-08-13",
+      "end": "2026-08-17",
+      "time": "입장 08:00~13:00",
+      "place": "거문오름·제주세계자연유산센터 일대",
+      "address": "제주시 조천읍 선교로 569-36",
+      "host": "제주특별자치도 주최 · 거문오름국제트레킹위원회 주관",
+      "contact": "064-710-6641",
+      "fee": "무료",
+      "category": "트레킹",
+      "summary": "평소 닫혀 있는 거문오름 용암길이 닷새 동안 열렸습니다. 기간 중에는 예약 없이 용암길 6km를 걸을 수 있었습니다.",
+      "program": [
+        "용암길 6km(약 3시간 30분) 한시 개방 · 해설사 동행 09:30~14:00, 30분 간격",
+        "태극길 정상코스 2.1km · 분화구코스 5.0km · 능선코스 6.7km",
+        "개막식 8월 14일 09:00 제주세계자연유산센터 — 거문오름 풍물단 길놀이, 축하공연",
+        "체험 프로그램 · 주민 참여 프로그램",
+        "용암길 종점 → 센터 무료 셔틀버스 10:30~16:30, 30분 간격"
+      ],
+      "poster": "assets/img/ev_2026_trekking_poster.jpg",
+      "photos": [
+        "assets/img/ev_2026_trekking_1.jpg"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "제주특별자치도 보도자료 2026.8.4.",
+          "url": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=2027859"
+        }
+      ],
+      "source": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=2027859",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "2026-golche-cherry",
+      "title": "2026 골체오름 벚꽃축제",
+      "start": "2026-04-04",
+      "end": "2026-04-05",
+      "time": "",
+      "place": "골체오름 일대",
+      "address": "제주시 조천읍 선흘리 1911",
+      "host": "선흘2리 마을회",
+      "contact": "064-782-5479",
+      "fee": "무료",
+      "category": "마을 축제",
+      "summary": "'선흘2리, 벚꽃에 물들다'. 봄이면 벚꽃으로 덮이는 골체오름에서 마을 주민들이 함께 준비한 축제입니다.",
+      "program": [
+        "음악 공연 — 4월 4일 최예림, 류준영, 홍조&한스 / 4월 5일 주낸드, 전기호",
+        "노래자랑 '선흘2리, 꽃보다 노래'",
+        "이벤트 행사 · 랜덤 플레이 댄스",
+        "체험 프로그램",
+        "먹거리장터",
+        "벚꽃 배경 포토 스팟"
+      ],
+      "poster": "assets/img/ev_2026_cherry_poster.jpg",
+      "photos": [
+        "assets/img/ev_2026_cherry_1.jpg",
+        "assets/img/ev_2026_cherry_2.jpg"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "비짓제주 행사 안내",
+          "url": "https://m.visitjeju.net/kr/festival/view?contentsid=CNTS_300000000014186"
+        },
+        {
+          "label": "뉴스제주 2026.4.8. 보도",
+          "url": "https://www.newsjeju.net/news/articleView.html?idxno=419349"
+        }
+      ],
+      "source": "https://m.visitjeju.net/kr/festival/view?contentsid=CNTS_300000000014186",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "2025-insect-festival",
+      "title": "생태마을 곤충 대축제",
+      "start": "2025-07-05",
+      "end": "2025-07-20",
+      "time": "기간 중 마을별 일정",
+      "place": "선흘2리",
+      "address": "",
+      "host": "2025 세계유산축전 '유산마을 이야기' — 선흘2리",
+      "contact": "",
+      "fee": "",
+      "category": "마을 축제",
+      "summary": "2025 세계유산축전 기간에 7개 세계자연유산마을이 저마다 프로그램을 열었고, 선흘2리는 '생태마을 곤충 대축제'를 선보였습니다.",
+      "program": [],
+      "poster": "",
+      "photos": [
+        "assets/img/fl_ill_insect_beetle.jpg"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "세계유산축전 제주 공식 사이트",
+          "url": "https://worldheritage.kr/45"
+        }
+      ],
+      "source": "https://worldheritage.kr/45",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "2025-golche-cherry",
+      "title": "2025 골체오름 벚꽃축제",
+      "start": "2025-03-29",
+      "end": "2025-03-30",
+      "time": "",
+      "place": "골체오름 일대",
+      "address": "제주시 조천읍 선흘리 1911",
+      "host": "",
+      "contact": "",
+      "fee": "",
+      "category": "마을 축제",
+      "summary": "'벚꽃을 벗하여 오름을 오르다'. 골체오름에서 처음 열린 벚꽃축제입니다.",
+      "program": [
+        "골체오름 벚꽃길",
+        "음악 공연 — 3월 29일 조이랑, 대니정, 프로젝트 온 / 3월 30일 밴드 이강, 오가람 밴드",
+        "콘텐츠 마켓",
+        "지역 홍보관 전시",
+        "벚꽃 솜사탕 만들기 체험"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "비짓제주 행사 안내",
+          "url": "https://www.visitjeju.net/kr/festival/view?contentsid=CNTS_300000000013463"
+        }
+      ],
+      "source": "https://www.visitjeju.net/kr/festival/view?contentsid=CNTS_300000000013463",
+      "checked": "2026-11-16",
+      "hidden": false,
+      "poster": "assets/img/ev_2025_cherry_poster.jpg",
+      "photos": []
+    },
+    {
+      "id": "2024-geomun-trekking",
+      "title": "2024 세계자연유산 거문오름 트레킹",
+      "start": "2024-10-25",
+      "end": "2024-10-28",
+      "time": "09:00~13:00 입장",
+      "place": "거문오름 일대",
+      "address": "제주시 조천읍 선교로 569-36",
+      "host": "",
+      "contact": "064-750-2543",
+      "fee": "무료",
+      "category": "트레킹",
+      "summary": "나흘 동안 용암길이 열렸습니다. 선인분교 학생들의 풍물 공연과 선흘2리 주민들이 운영한 목공 체험이 함께했습니다.",
+      "program": [
+        "태극길 6.7km(약 3시간 30분) · 용암길 6km(약 3시간 30분)",
+        "용암길 해설사 동행 10:00~14:00, 30분 간격",
+        "개막식 10월 26일 09:00 — 거문오름 풍물단 길놀이, 제라진소년소녀합창단",
+        "10월 27일 선인분교 학생 풍물 공연 · 팝페라 듀오 공연",
+        "선흘2리 주민 목공 체험 · 책 나눔",
+        "용암길 끝 → 센터 무료 셔틀버스 10:30~16:30"
+      ],
+      "poster": "assets/img/ev_2024_trekking_leaflet.jpg",
+      "photos": [],
+      "video": "",
+      "links": [
+        {
+          "label": "제주특별자치도 보도자료 2024.10.24.",
+          "url": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=1483355"
+        }
+      ],
+      "source": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=1483355",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "2023-geomun-trekking",
+      "title": "2023 거문오름 국제트레킹",
+      "start": "2023-06-15",
+      "end": "2023-06-19",
+      "time": "09:00~13:00 입장",
+      "place": "거문오름",
+      "address": "제주시 조천읍 선교로 569-36",
+      "host": "거문오름국제트레킹위원회 주최·주관 · 제주특별자치도 후원",
+      "contact": "",
+      "fee": "무료",
+      "category": "트레킹",
+      "summary": "닷새 동안 용암길 약 6km가 열렸고, 4,468명이 거문오름을 찾았습니다. 선흘2리 마을 연계 프로그램도 함께 운영했습니다.",
+      "program": [
+        "태극길 10km · 용암길 6km(약 3시간 30분)",
+        "용암길: 탐방안내소 → 거문오름 정상 → 용암길 입구 → 벵뒤굴(동굴 미개방) → 선인동사거리",
+        "개막식 6월 15일 09:30 세계자연유산센터",
+        "천연 벌레퇴치제 만들기 · 스포츠테이핑 체험",
+        "세계자연유산 어린이 해설사와 함께하는 탐방",
+        "선흘2리 마을 연계 프로그램"
+      ],
+      "poster": "",
+      "photos": [
+        "assets/img/ev_2023_trekking_1.jpg",
+        "assets/img/ev_2023_trekking_2.jpg",
+        "assets/img/ev_2023_trekking_3.jpg"
+      ],
+      "video": "",
+      "links": [
+        {
+          "label": "제주특별자치도 보도자료 2023.6.13.",
+          "url": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=1420016"
+        },
+        {
+          "label": "제주특별자치도 보도자료 2023.6.20.",
+          "url": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=1420945"
+        },
+        {
+          "label": "비짓제주 행사 안내",
+          "url": "https://www.visitjeju.net/kr/festival/view?contentsid=CNTS_000000000022034"
+        }
+      ],
+      "source": "https://www.jeju.go.kr/news/bodo/list.htm?act=view&seq=1420016",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "yearly-cherry",
+      "title": "골체오름 벚꽃축제",
+      "start": "",
+      "end": "",
+      "usual": "봄 · 2025년부터 해마다 · 지난 개최 2026년 4월 4~5일",
+      "time": "",
+      "place": "골체오름 일대",
+      "address": "제주시 조천읍 선흘리 1911",
+      "host": "선흘2리 마을회",
+      "contact": "064-782-5479",
+      "fee": "",
+      "category": "마을 축제",
+      "summary": "벚꽃이 피는 봄, 골체오름에서 마을 주민들이 여는 축제입니다. 다음 일정이 정해지면 이곳에 올립니다.",
+      "program": [],
+      "poster": "",
+      "photos": [
+        "assets/img/fl_ill_golche_cherry.jpg",
+        "assets/img/ev_2026_cherry_2.jpg"
+      ],
+      "video": "",
+      "links": [],
+      "source": "",
+      "checked": "2026-11-16",
+      "hidden": false
+    },
+    {
+      "id": "yearly-trekking",
+      "title": "세계자연유산 거문오름 트레킹",
+      "start": "",
+      "end": "",
+      "usual": "해마다 한 번 · 지난 개최 2026년 8월 13~17일",
+      "time": "",
+      "place": "거문오름 일대",
+      "address": "제주시 조천읍 선교로 569-36",
+      "host": "제주특별자치도 주최 · 거문오름국제트레킹위원회 주관",
+      "contact": "064-710-6641",
+      "fee": "",
+      "category": "트레킹",
+      "summary": "평소 닫혀 있는 거문오름 용암길이 열리는 때입니다. 다음 일정은 제주특별자치도 세계유산본부가 알립니다.",
+      "program": [],
+      "poster": "",
+      "photos": [
+        "assets/img/ev_trekking_observatory.jpg"
+      ],
+      "video": "",
+      "links": [],
+      "source": "",
+      "checked": "2026-11-16",
+      "hidden": false
+    }
+  ]
+}

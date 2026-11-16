@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>오시는 길 | 선흘2리</title>
+<meta name="description" content="선흘2리 마을회와 제주세계자연유산센터·거문오름 찾아오는 길.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="오시는 길 | 선흘2리">
+<meta property="og:description" content="선흘2리 마을회와 제주세계자연유산센터·거문오름 찾아오는 길.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta property="og:image" content="assets/img/og_village.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1C3A2C">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<main id="main">
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow">Visit</p>
+  <h1>오시는 길</h1>
+  <p class="lead" id="addr"></p>
+</div></div>
+<section><div class="wrap two">
+  <div id="map"></div>
+  <div>
+    <table class="facts" id="pts"></table>
+    <div class="btn-row" id="navBtns"></div>
+    <ul class="prose" id="tips" style="margin-top:18px"></ul>
+  </div>
+</div></section>
+</main>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script src="assets/js/common.js?v=20261116r"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261116r" defer></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+SH2.init(function (site) {
+  var E = SH2.esc, v = site.visit || {}, c = site.contact || {};
+  SH2.el("addr").textContent = v.address || c.address || "";
+  var map = L.map("map", { scrollWheelZoom: false }).setView(v.center || [33.47, 126.70], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "&copy; OpenStreetMap" }).addTo(map);
+  var pts = (v.points || []).filter(function (p) { return typeof p.lat === "number"; });
+  pts.forEach(function (p) { L.marker([p.lat, p.lng]).addTo(map).bindPopup("<b>" + E(p.name) + "</b><br>" + E(p.address || "")); });
+  if (pts.length === 1) map.setView([pts[0].lat, pts[0].lng], 14);
+  if (pts.length > 1) map.fitBounds(pts.map(function (p) { return [p.lat, p.lng]; }), { padding: [40, 40] });
+  var rows = [];
+  if (c.address) rows.push([c.org || "마을회", c.address + (c.place ? " (" + c.place + ")" : "") + (c.tel ? " · " + c.tel : "")]);
+  (v.points || []).forEach(function (p) { rows.push([p.name, p.address || ""]); });
+  SH2.el("pts").innerHTML = rows.map(function (r) { return "<tr><th style='white-space:normal;width:9em'>" + E(r[0]) + "</th><td>" + E(r[1]) + "</td></tr>"; }).join("");
+  var q = encodeURIComponent(c.address || "");
+  SH2.el("navBtns").innerHTML = (q ? '<a class="btn small" target="_blank" rel="noopener" href="https://map.kakao.com/?q=' + q + '">카카오맵에서 보기</a><a class="btn small line" target="_blank" rel="noopener" href="https://map.naver.com/p/search/' + q + '">네이버 지도에서 보기</a>' : "") +
+    (v.links || []).map(function (l) { return '<a class="btn small line" target="_blank" rel="noopener" href="' + E(SH2.safeUrl(l.url)) + '">' + E(l.label) + "</a>"; }).join("");
+  SH2.el("tips").innerHTML = (v.tips || []).map(function (t) { return "<li>" + E(t) + "</li>"; }).join("");
+});
+</script>
+</body>
+</html>

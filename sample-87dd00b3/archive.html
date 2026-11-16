@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>지난 행사 | 선흘2리</title>
+<meta name="description" content="선흘2리와 거문오름 일대에서 열린 지난 행사를 해마다 모았습니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="지난 행사 | 선흘2리">
+<meta property="og:description" content="선흘2리와 거문오름 일대에서 열린 지난 행사를 해마다 모았습니다.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta property="og:image" content="assets/img/og_village.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1C3A2C">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<main id="main">
+<div class="page-head has-tabs"><div class="wrap">
+  <p class="eyebrow">Records</p>
+  <h1>마을 행사</h1>
+  <nav class="ptabs" aria-label="행사"><a href="events.html">행사 안내</a><a href="archive.html" aria-current="page">지난 행사</a></nav>
+</div></div>
+<section style="padding-top:28px"><div class="wrap">
+  <p class="lead" style="margin:0 0 18px">선흘2리와 거문오름 일대에서 열린 행사를 해마다 모았습니다.</p>
+  <div class="chips" id="chips" role="group" aria-label="연도"></div>
+  <div class="grid" id="grid"></div>
+</div></section>
+</main>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script src="assets/js/common.js?v=20261116r"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261116r" defer></script>
+<script>
+SH2.init(function () {
+  SH2.loadEvents().then(function (list) {
+    var past = SH2.splitEvents(list).past, chips = SH2.el("chips"), grid = SH2.el("grid");
+    var years = past.map(function (e) { return e.start.slice(0, 4); }).filter(function (y, i, a) { return a.indexOf(y) === i; });
+    function draw(y) {
+      var items = past.filter(function (e) { return !y || e.start.slice(0, 4) === y; });
+      grid.innerHTML = items.length ? items.map(function (e) { return SH2.eventCard(e); }).join("") : '<p class="meta">아직 올라온 지난 행사가 없습니다.</p>';
+    }
+    if (years.length > 1) [""].concat(years).forEach(function (y, i) {
+      var b = document.createElement("button");
+      b.className = "chip"; b.textContent = y ? y + "년" : "전체"; b.setAttribute("aria-pressed", i === 0);
+      b.addEventListener("click", function () {
+        chips.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+        draw(y);
+      });
+      chips.appendChild(b);
+    }); else chips.hidden = true;
+    draw("");
+    SH2.bindEvents(document.querySelector("main"), list);
+  });
+});
+</script>
+</body>
+</html>

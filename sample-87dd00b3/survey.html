@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>만족도 조사 — 선흘2리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<main id="main">
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow">Survey</p>
+  <h1 id="title">만족도 조사</h1>
+  <p class="lead" id="lead">참여해 주셔서 고맙습니다. 다음 행사를 더 잘 준비하는 데 쓰겠습니다. 이름과 연락처는 묻지 않습니다.</p>
+</div></div>
+<section><div class="wrap" style="max-width:760px">
+  <div class="empty" id="closed" hidden></div>
+  <form id="f" hidden>
+    <div id="qs"></div>
+    <label class="ck" style="margin-top:18px"><input type="checkbox" id="consent" required><span>응답 내용을 행사 운영과 결과 보고에 쓰는 데 동의합니다. (이름·연락처는 받지 않습니다)</span></label>
+    <input type="text" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+    <p id="msg" role="alert" style="min-height:1.6em;margin:12px 0;font-weight:700;color:var(--scoria)"></p>
+    <button class="btn" type="submit" id="go">보내기</button>
+  </form>
+  <div class="empty" id="thanks" hidden>응답을 받았습니다. 고맙습니다.<br><a class="more" href="index.html">홈으로 →</a></div>
+</div></section>
+</main>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script src="assets/js/common.js?v=20261116r"></script>
+<script src="assets/js/survey_q.js?v=20261116r"></script>
+<script>
+SH2.init(function () {
+  var E = SH2.esc, Q = window.SH2_SURVEY, SC = window.SH2_SCALE, id = new URLSearchParams(location.search).get("e") || "", API = SH2.cfg.api;
+  function $(x) { return document.getElementById(x); }
+  function closed(t) { $("closed").innerHTML = t + '<br><a class="more" href="events.html">행사 안내 보기 →</a>'; $("closed").hidden = false; }
+  SH2.loadEvents().then(function (list) {
+    var ev = list.filter(function (e) { return e.id === id; })[0];
+    if (!ev) return closed("조사할 행사를 찾지 못했습니다.");
+    $("title").textContent = ev.title + " 만족도 조사";
+    if (!API || !ev.survey_open) return closed("지금은 이 행사의 만족도 조사를 받고 있지 않습니다.");
+    var done = false; try { done = localStorage.getItem("sh2-survey-" + id) === "1"; } catch (e) {}
+    if (done) { $("thanks").hidden = false; return; }
+    $("qs").innerHTML = Q.map(function (q, i) {
+      var h = '<fieldset class="q"><legend>' + (i + 1) + ". " + E(q.q) + (q.t === "text" ? ' <small>(선택)</small>' : "") + "</legend>";
+      if (q.t === "text") h += '<textarea name="' + q.k + '" maxlength="1000" aria-label="' + E(q.q) + '"></textarea>';
+      else (q.t === "scale" ? [5, 4, 3, 2, 1] : q.o).forEach(function (o) {
+        var label = q.t === "scale" ? o + "점 · " + SC[o - 1] : o;
+        h += '<label class="opt"><input type="radio" name="' + q.k + '" value="' + E(o) + '" required><span>' + E(label) + "</span></label>";
+      });
+      return h + "</fieldset>";
+    }).join("");
+    $("f").hidden = false;
+    $("f").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var a = { consent: $("consent").checked ? "동의함" : "" };
+      Q.forEach(function (q) { var el = q.t === "text" ? $("f").elements[q.k] : $("f").querySelector('input[name="' + q.k + '"]:checked'); a[q.k] = el ? el.value.trim() : ""; });
+      $("go").disabled = true; $("go").textContent = "보내는 중…"; $("msg").textContent = "";
+      fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ mode: "survey_submit", id: id, answers: a, hp: $("hp").value }), redirect: "follow" })
+        .then(function (r) { return r.json(); }).then(function (d) {
+          if (!d.ok) throw new Error(d.error || "보내지 못했습니다");
+          try { localStorage.setItem("sh2-survey-" + id, "1"); } catch (x) {}
+          $("f").hidden = true; $("thanks").hidden = false; window.scrollTo(0, 0);
+        }).catch(function (err) { $("msg").textContent = err.message + " 잠시 뒤 다시 눌러 주세요."; $("go").disabled = false; $("go").textContent = "보내기"; });
+    });
+  });
+});
+</script>
+</body>
+</html>

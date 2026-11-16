@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>행사 보고서 — 선흘2리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<div class="admin report">
+  <p class="noprint"><a class="more" href="staff.html">← 준비 공유로</a></p>
+  <div class="panel noprint" id="noApi" hidden><p>아직 저장소가 연결되지 않아 이 화면을 쓸 수 없습니다.</p></div>
+  <div class="panel noprint" id="login" hidden>
+    <h2>들어가기</h2>
+    <form id="loginForm"><div class="field"><label for="skey">관계자 비밀번호</label><input type="password" id="skey" autocomplete="current-password"></div><button class="btn" type="submit">보고서 열기</button></form>
+  </div>
+  <div id="doc"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script src="assets/js/survey_q.js?v=20261116r"></script>
+<script>
+(function () {
+  "use strict";
+  var API = (window.SH2_CONFIG || {}).api || "";
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function toast(m) { var t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove("show"); }, 2600); }
+  function post(body) {
+    return fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), redirect: "follow" })
+      .then(function (r) { return r.json(); }).then(function (d) { if (!d.ok) throw new Error(d.error === "auth" ? "비밀번호가 맞지 않습니다" : (d.error || "처리하지 못했습니다")); return d; });
+  }
+  /* 관계자 비밀번호(준비 공유에서 들어온 값) 또는 관리자 비밀번호(관리자 페이지에서 들어온 값) */
+  function creds() { var o = {}; try { var s = sessionStorage.getItem("sh2-staff"), k = sessionStorage.getItem("sh2-admin"); if (s) o.skey = s; if (k) o.key = k; } catch (e) {} return o; }
+  function call(body) { var c = creds(); for (var k in c) body[k] = c[k]; return post(body); }
+  function qid() { return new URLSearchParams(location.search).get("e") || ""; }
+  function when(e) { return e.start ? e.start + (e.end && e.end !== e.start ? " ~ " + e.end : "") : (e.usual || "날짜 미정"); }
+
+  var Q = window.SH2_SURVEY, SC = window.SH2_SCALE;
+  function won(v) { var n = +String(v || "").replace(/\D/g, ""); return n ? n.toLocaleString() + "원" : "—"; }
+  function table(head, rows) { return '<table class="rtable"><thead><tr>' + head.map(function (h) { return "<th>" + h + "</th>"; }).join("") + "</tr></thead><tbody>" + rows.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>"; }
+  function bar(pct) { return '<span class="rbar"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></span>'; }
+  function render(d) {
+    var e = d.event, p = d.prep || {}, o = d.ops || {}, R = (d.responses || []).map(function (r) { return r.a || {}; }), n = R.length, h = "";
+    h += '<div class="row-actions noprint" style="margin-top:0"><button class="btn" onclick="window.print()">인쇄 · PDF로 저장</button><a class="btn line" href="staff.html?e=' + encodeURIComponent(e.id) + '">준비 내용 고치기</a></div>';
+    h += '<p class="eyebrow" style="margin-top:22px">행사 보고서</p><h1>' + esc(e.title) + '</h1><p class="note">선흘2리 마을회 · 만든 때 ' + esc(d.made) + "</p>";
+    /* 1 개요 */
+    var facts = [["일시", when(e) + (e.time ? " · " + e.time : "")], ["장소", e.place], ["주소", e.address], ["주최", e.host], ["참가비", e.fee], ["문의", e.contact]].filter(function (r) { return r[1]; });
+    h += "<h2>1. 행사 개요</h2>" + table(["항목", "내용"], facts.map(function (r) { return [r[0], esc(r[1])]; })) + (e.summary ? "<p>" + esc(e.summary) + "</p>" : "");
+    /* 2 준비 */
+    var td = p.todos || [], done = td.filter(function (t) { return t.done; }), left = td.filter(function (t) { return !t.done; });
+    h += "<h2>2. 준비 과정</h2>";
+    if (td.length) {
+      h += "<p>준비한 일 " + td.length + "건 가운데 " + done.length + "건을 마쳤습니다.</p>" + table(["할 일", "담당", "마감", "상태"], done.concat(left).map(function (t) { return [esc(t.text), esc(t.owner), esc(t.due), t.done ? "완료" : "남음"]; }));
+    } else h += '<p class="note">준비 공유에 적은 할 일이 없습니다.</p>';
+    if ((p.memos || []).length) h += "<h3>메모·결정</h3>" + table(["날짜", "누가", "내용"], p.memos.map(function (m) { return [esc(m.date), esc(m.who), esc(m.text)]; }));
+    /* 3 진행 */
+    h += "<h2>3. 진행</h2>" + table(["항목", "내용"], [["참가 인원", o.attendance ? esc(o.attendance) + "명" : "입력하지 않음"], ["운영 인원", o.staff_count ? esc(o.staff_count) + "명" : "입력하지 않음"]]);
+    if (o.result_note) h += "<p>" + esc(o.result_note) + "</p>";
+    if ((e.program || []).length) h += "<h3>프로그램</h3><ul>" + e.program.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+    if ((p.timeline || []).length) h += "<h3>당일 시간표</h3>" + table(["시간", "내용", "담당"], p.timeline.map(function (t) { return [esc(t.time), esc(t.text), esc(t.owner)]; }));
+    if ((p.supplies || []).length) h += "<h3>준비물</h3>" + table(["품목", "수량", "가져온 사람", "확인"], p.supplies.map(function (s) { return [esc(s.item), esc(s.qty), esc(s.owner), s.done ? "챙김" : "—"]; }));
+    /* 4 만족도 */
+    h += "<h2>4. 만족도 조사 결과</h2>";
+    if (!n) h += '<p class="note">아직 받은 응답이 없습니다.</p>';
+    else {
+      var scales = Q.filter(function (q) { return q.t === "scale"; }), all = [], rows = scales.map(function (q) {
+        var v = R.map(function (a) { return +a[q.k]; }).filter(function (x) { return x >= 1 && x <= 5; }); all = all.concat(v);
+        var avg = v.length ? v.reduce(function (s, x) { return s + x; }, 0) / v.length : 0;
+        return [esc(q.q), v.length ? avg.toFixed(2) + " " + bar(avg * 20) : "—", v.length + "명"];
+      });
+      var total = all.length ? (all.reduce(function (s, x) { return s + x; }, 0) / all.length).toFixed(2) : "—";
+      function yes(k) { var v = R.map(function (a) { return a[k]; }).filter(Boolean); return v.length ? Math.round(100 * v.filter(function (x) { return x === "있다"; }).length / v.length) + "%" : "—"; }
+      h += '<div class="kpis"><div><b>' + n + '</b><span>응답 수' + (o.attendance ? " (참가 " + esc(o.attendance) + "명 가운데)" : "") + '</span></div><div><b>' + total + '</b><span>5점 문항 전체 평균</span></div><div><b>' + yes("recommend") + '</b><span>추천 의향 있다</span></div><div><b>' + yes("again") + "</b><span>다시 참여 의사 있다</span></div></div>";
+      h += "<h3>5점 문항</h3>" + table(["문항", "평균(5점 만점)", "답한 사람"], rows);
+      h += "<h3>응답자 구성</h3>" + Q.filter(function (q) { return q.t === "choice"; }).map(function (q) {
+        var v = R.map(function (a) { return a[q.k]; }).filter(Boolean);
+        return "<h4>" + esc(q.q) + "</h4>" + table(["보기", "응답", "비율"], q.o.map(function (opt) { var c = v.filter(function (x) { return x === opt; }).length; return [esc(opt), c + "명", v.length ? Math.round(100 * c / v.length) + "% " + bar(100 * c / v.length) : "—"]; }));
+      }).join("");
+    }
+    /* 5 의견 */
+    h += "<h2>5. 참가자 의견</h2>";
+    var any = false;
+    Q.filter(function (q) { return q.t === "text"; }).forEach(function (q) {
+      var v = R.map(function (a) { return a[q.k]; }).filter(Boolean); if (!v.length) return; any = true;
+      h += "<h3>" + esc(q.q) + "</h3><ul>" + v.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+    });
+    if (!any) h += '<p class="note">적어 주신 의견이 없습니다.</p>';
+    /* 6 예산 */
+    h += "<h2>6. 예산</h2>";
+    if ((p.budget || []).length) {
+      var sp = 0, sa = 0; p.budget.forEach(function (b) { sp += +String(b.plan).replace(/\D/g, "") || 0; sa += +String(b.actual).replace(/\D/g, "") || 0; });
+      h += table(["항목", "계획", "실제"], p.budget.map(function (b) { return [esc(b.item), won(b.plan), won(b.actual)]; }).concat([["<b>합계</b>", "<b>" + sp.toLocaleString() + "원</b>", "<b>" + sa.toLocaleString() + "원</b>"]]));
+    } else h += '<p class="note">준비 공유에 적은 예산이 없습니다.</p>';
+    /* 7 사진·자료 */
+    var ph = (e.photos || []).filter(function (u) { return /^(https?:\/\/|assets\/|\/uploads\/)/.test(u); });
+    if (ph.length) h += '<h2>7. 사진</h2><div class="photos">' + ph.map(function (u) { return '<img src="' + esc(u) + '" alt="">'; }).join("") + "</div>";
+    if ((p.links || []).length) h += "<h3>자료</h3><ul>" + p.links.map(function (l) { return '<li><a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label || l.url) + "</a></li>"; }).join("") + "</ul>";
+    /* 8 기준 */
+    h += "<h2>" + (ph.length ? "8" : "7") + ". 자료와 집계 기준</h2><ul>" +
+      "<li>이 보고서는 누리집에 쌓인 기록으로 만들었습니다: 행사 안내(관리자 페이지), 준비 공유(관계자), 만족도 조사 응답(참가자).</li>" +
+      "<li>만족도 응답은 " + n + "건입니다. 이름과 연락처는 받지 않았습니다.</li>" +
+      "<li>5점 문항의 평균은 그 문항에 답한 사람만으로 계산했고, 답하지 않은 칸은 빼고 셌습니다. 전체 평균은 5점 문항의 모든 답을 합쳐 낸 값입니다.</li>" +
+      "<li>비율은 그 문항에 답한 사람 가운데 차지하는 몫이며 소수점 아래를 반올림했습니다.</li>" +
+      "<li>참가자 의견은 적어 주신 글 그대로 실었습니다.</li>" +
+      "<li>참가 인원·운영 인원·예산은 관계자가 직접 적은 값이며, 적지 않은 칸은 비워 두었습니다.</li></ul>";
+    $("doc").innerHTML = h; document.title = e.title + " — 행사 보고서";
+  }
+  function open() { return call({ mode: "report", id: qid() }).then(function (d) { $("login").hidden = true; render(d); }); }
+  if (!API) $("noApi").hidden = false;
+  else if (!qid()) $("doc").innerHTML = '<div class="panel"><p>보고서를 볼 행사가 정해지지 않았습니다. <a href="staff.html">준비 공유</a>에서 행사를 고른 뒤 「보고서 보기」를 눌러 주세요.</p></div>';
+  else { var c = creds(); if (c.skey || c.key) open().catch(function () { $("login").hidden = false; }); else $("login").hidden = false; }
+  $("loginForm").addEventListener("submit", function (ev) {
+    ev.preventDefault(); try { sessionStorage.setItem("sh2-staff", $("skey").value); } catch (e) {}
+    open().catch(function (e) { try { sessionStorage.removeItem("sh2-staff"); } catch (x) {} toast(e.message); });
+  });
+})();
+</script>
+</body>
+</html>

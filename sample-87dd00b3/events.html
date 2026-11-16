@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>행사 안내 | 선흘2리</title>
+<meta name="description" content="선흘2리와 거문오름 일대에서 열리는 행사 일정과 장소, 프로그램 안내.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="행사 안내 | 선흘2리">
+<meta property="og:description" content="선흘2리와 거문오름 일대에서 열리는 행사 일정과 장소, 프로그램 안내.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta property="og:image" content="assets/img/og_village.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1C3A2C">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<main id="main">
+<div class="page-head has-tabs"><div class="wrap">
+  <p class="eyebrow">Events</p>
+  <h1>마을 행사</h1>
+  <nav class="ptabs" aria-label="행사"><a href="events.html" aria-current="page">행사 안내</a><a href="archive.html">지난 행사</a></nav>
+</div></div>
+<section style="padding-top:28px"><div class="wrap">
+  <p class="lead" style="margin:0 0 18px">선흘2리와 거문오름 일대에서 열리는 행사입니다. 카드를 누르면 자세한 안내를 볼 수 있습니다.</p>
+  <div class="grid" id="up"></div>
+</div></section>
+<section class="alt"><div class="wrap">
+  <p class="eyebrow">Calendar</p><h2>달력으로 보기</h2>
+  <div class="cal-head"><button class="btn small line" id="prev">‹ 이전 달</button><b id="ym"></b><button class="btn small line" id="next">다음 달 ›</button></div>
+  <div class="cal" id="cal"></div>
+</div></section>
+<section id="yearlyBlock" hidden><div class="wrap">
+  <div class="sec-head"><div><p class="eyebrow">Every year</p><h2>해마다 열리는 행사</h2><p class="lead">다음 일정이 정해지면 위 목록에 올라옵니다.</p></div></div>
+  <div class="grid" id="yearly"></div>
+</div></section>
+</main>
+<script src="assets/js/config.js?v=20261116r"></script>
+<script src="assets/js/common.js?v=20261116r"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261116r" defer></script>
+<script>
+SH2.init(function () {
+  var E = SH2.esc;
+  SH2.loadEvents().then(function (list) {
+    var s = SH2.splitEvents(list);
+    SH2.el("up").innerHTML = s.upcoming.length
+      ? s.upcoming.map(function (e) { return SH2.eventCard(e); }).join("")
+      : '<div class="empty" style="grid-column:1/-1">지금 안내 중인 행사가 없습니다. 새 행사가 정해지면 이곳에 올라옵니다.<br><a class="more" href="archive.html">지난 행사 보기 →</a></div>';
+    if (s.yearly.length) {
+      SH2.el("yearlyBlock").hidden = false;
+      SH2.el("yearly").innerHTML = s.yearly.map(function (e) { return SH2.eventCard(e); }).join("");
+    }
+    SH2.bindEvents(document.querySelector("main"), list);
+    var dated = list.filter(function (e) { return e.start; });
+    var t = SH2.parse(s.today), y = t.getFullYear(), m = t.getMonth();
+    function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+    function draw() {
+      SH2.el("ym").textContent = y + "년 " + (m + 1) + "월";
+      var first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate();
+      var h = ["일", "월", "화", "수", "목", "금", "토"].map(function (d) { return '<div class="dow">' + d + "</div>"; }).join("");
+      for (var i = 0; i < first.getDay(); i++) h += '<div class="day out"></div>';
+      for (var d = 1; d <= days; d++) {
+        var id = iso(new Date(y, m, d));
+        var hit = dated.filter(function (e) { return e.start <= id && (e.end || e.start) >= id; });
+        h += '<div class="day' + (id === s.today ? " today" : "") + (hit.length ? " has" : "") + '"' + (hit.length ? ' data-open="' + E(hit[0].id) + '" role="button" tabindex="0"' : "") + ">" + d +
+          (hit.length ? "<small>" + E(hit[0].title) + "</small>" : "") + "</div>";
+      }
+      SH2.el("cal").innerHTML = h;
+    }
+    draw();
+    SH2.el("prev").onclick = function () { m--; if (m < 0) { m = 11; y--; } draw(); };
+    SH2.el("next").onclick = function () { m++; if (m > 11) { m = 0; y++; } draw(); };
+  });
+});
+</script>
+</body>
+</html>

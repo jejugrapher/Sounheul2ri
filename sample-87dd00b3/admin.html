@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>관리자 — 선흘2리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css?v=20261116r">
+</head>
+<body>
+<div class="admin">
+  <p><a href="index.html" class="more" style="margin:0">← 홈페이지로</a></p>
+  <h1>선흘2리 홈페이지 관리</h1>
+  <p class="note">행사를 올리고 고치는 곳입니다. 저장하면 홈페이지에 바로 나타납니다.</p>
+
+  <!-- 들어가기 -->
+  <div class="panel" id="loginPanel">
+    <h2>들어가기</h2>
+    <div id="noApi" class="empty" hidden>행사 저장소가 아직 연결되지 않았습니다. 연결한 뒤에 사용할 수 있습니다.</div>
+    <form id="loginForm">
+      <div class="field"><label for="key">관리자 비밀번호</label><input id="key" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit">들어가기</button>
+    </form>
+  </div>
+
+  <div id="app" hidden>
+    <div class="tabs" role="tablist">
+      <button data-tab="list" class="on">행사 목록</button>
+      <button data-tab="edit">새 행사 올리기</button>
+      <button data-tab="ops">행사 운영</button>
+      <button data-tab="notice">공지</button>
+      <button id="logout" style="margin-left:auto">나가기</button>
+    </div>
+
+    <!-- 목록 -->
+    <div class="panel" data-pane="list">
+      <h2>다가오는 행사</h2><div id="lsUp"></div>
+      <h2 style="margin-top:22px">날짜 없는 행사(해마다 열리는 행사)</h2><div id="lsYearly"></div>
+      <h2 style="margin-top:22px">지난 행사</h2><div id="lsPast"></div>
+    </div>
+
+    <!-- 입력 -->
+    <div class="panel" data-pane="edit" hidden>
+      <h2 id="editTitle">새 행사 올리기</h2>
+      <form id="evForm">
+        <input type="hidden" id="f_id">
+        <div class="field"><label for="f_title">행사 이름 *</label><input id="f_title" required maxlength="80" placeholder="예) 제3회 골체오름 벚꽃축제"></div>
+        <div class="pair">
+          <div class="field"><label for="f_start">시작하는 날</label><input id="f_start" type="date"><span class="hint">날짜가 아직 안 정해졌으면 비워 두세요.</span></div>
+          <div class="field"><label for="f_end">끝나는 날</label><input id="f_end" type="date"><span class="hint">하루짜리 행사는 비워 두세요.</span></div>
+        </div>
+        <div class="pair">
+          <div class="field"><label for="f_time">시간</label><input id="f_time" maxlength="60" placeholder="예) 10:00~16:00"></div>
+          <div class="field"><label for="f_category">종류</label>
+            <select id="f_category"><option>마을 축제</option><option>트레킹</option><option>주민 행사</option><option>체험·교육</option><option>공연·전시</option><option>기타</option></select></div>
+        </div>
+        <div class="field"><label for="f_usual">해마다 열리는 때</label><input id="f_usual" maxlength="60" placeholder="예) 매년 4월 초 — 날짜를 비웠을 때만 보입니다"></div>
+        <div class="pair">
+          <div class="field"><label for="f_place">장소</label><input id="f_place" maxlength="80" placeholder="예) 골체오름 일대"></div>
+          <div class="field"><label for="f_address">주소</label><input id="f_address" maxlength="120"></div>
+        </div>
+        <div class="pair">
+          <div class="field"><label for="f_host">주최</label><input id="f_host" maxlength="80" placeholder="예) 선흘2리 마을회"></div>
+          <div class="field"><label for="f_contact">문의 전화</label><input id="f_contact" maxlength="40" placeholder="예) 064-782-5479"></div>
+        </div>
+        <div class="field"><label for="f_fee">참가비</label><input id="f_fee" maxlength="60" placeholder="예) 무료"></div>
+        <div class="field"><label for="f_summary">한두 줄 소개</label><textarea id="f_summary" maxlength="400"></textarea></div>
+        <div class="field"><label for="f_program">프로그램</label><textarea id="f_program" placeholder="한 줄에 하나씩 적어 주세요"></textarea></div>
+        <div class="field"><label>포스터(대표 사진) 1장</label><input id="f_posterFile" type="file" accept="image/*"><div class="thumbs" id="posterThumb"></div></div>
+        <div class="field"><label>행사 사진 (여러 장 가능)</label><input id="f_photoFiles" type="file" accept="image/*" multiple><span class="hint">행사가 끝난 뒤 사진을 덧붙일 때도 여기서 올립니다. 얼굴이 나온 분께 허락받은 사진만 올려 주세요.</span><div class="thumbs" id="photoThumbs"></div></div>
+        <div class="field"><label for="f_video">유튜브 영상 주소</label><input id="f_video" maxlength="120" placeholder="예) https://youtu.be/…"></div>
+        <div class="field"><label for="f_links">관련 글(기사·안내) 주소</label><textarea id="f_links" placeholder="한 줄에 하나씩:  이름 | 주소&#10;예) 뉴스제주 보도 | https://…"></textarea></div>
+        <div class="field"><label><input type="checkbox" id="f_hidden" style="width:auto;min-height:0;margin-right:8px">홈페이지에서 잠시 숨기기</label></div>
+        <div class="row-actions">
+          <button class="btn" type="submit" id="saveBtn">저장하기</button>
+          <button class="btn line" type="button" id="cancelBtn">취소</button>
+          <button class="btn warn" type="button" id="delBtn" hidden>이 행사 지우기</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 행사 운영: 준비 → 홍보 → 진행 → 만족도 조사 → 보고서 -->
+    <div class="panel" data-pane="ops" hidden>
+      <h2>행사 운영</h2>
+      <p class="note">행사마다 준비 공유, 만족도 조사, 보고서를 여기서 다룹니다. 준비 공유와 보고서는 관계자 비밀번호로 엽니다.</p>
+      <div class="row-actions" style="margin:10px 0 4px"><a class="btn small line" href="staff.html" target="_blank">준비 공유 페이지 열기</a></div>
+      <div id="opsList"></div>
+      <h2 style="margin-top:26px">관계자 비밀번호</h2>
+      <p class="note" id="skeyState"></p>
+      <form id="skeyForm"><div class="field"><label for="sk_new">새 관계자 비밀번호 (6자 이상, 관리자 비밀번호와 다르게)</label><input type="password" id="sk_new" autocomplete="new-password" minlength="6"></div><button class="btn" type="submit">관계자 비밀번호 정하기</button></form>
+    </div>
+
+    <!-- 공지 -->
+    <div class="panel" data-pane="notice" hidden>
+      <h2>새 공지 올리기</h2>
+      <form id="noticeForm">
+        <div class="field"><label for="n_date">날짜</label><input type="date" id="n_date"><span class="hint">비워 두면 오늘 날짜로 올라갑니다.</span></div>
+        <div class="field"><label for="n_text">공지 내용</label><textarea id="n_text" maxlength="300" placeholder="예) 11월 20일(금) 오후 2시 복지회관에서 마을 총회가 열립니다."></textarea><span class="hint">홈 화면 맨 위 「알림」에 날짜와 함께 보입니다. 최근 3건이 먼저 보이고 나머지는 「지난 알림」에 모입니다.</span></div>
+        <button class="btn" type="submit">공지 올리기</button>
+      </form>
+      <h2 style="margin-top:26px">올린 공지</h2>
+      <div id="noticeList"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/config.js?v=20261116r"></script>
+<script>
+(function () {
+  "use strict";
+  var API = (window.SH2_CONFIG || {}).api || "";
+  var KEY = "", EVENTS = [], poster = "", photos = [];
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function toast(m) { var t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove("show"); }, 2800); }
+  function today() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+
+  /* 저장소 호출 — 비밀번호는 주소가 아니라 본문에 담아 보낸다 */
+  function call(body) {
+    body.key = KEY;
+    return fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), redirect: "follow" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) {
+          if (d.error === "auth") { logout(); throw new Error("비밀번호가 맞지 않습니다"); }
+          throw new Error(d.error || "저장소에서 오류가 났습니다");
+        }
+        return d;
+      });
+  }
+
+  function showApp(on) { $("app").hidden = !on; $("loginPanel").hidden = on; }
+  function logout() { KEY = ""; try { sessionStorage.removeItem("sh2-admin"); } catch (e) {} showApp(false); }
+  function tab(name) {
+    document.querySelectorAll("[data-pane]").forEach(function (p) { p.hidden = p.getAttribute("data-pane") !== name; });
+    document.querySelectorAll("[data-tab]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-tab") === name); });
+    window.scrollTo(0, 0);
+  }
+
+  function refresh() {
+    return call({ mode: "list" }).then(function (d) {
+      EVENTS = d.events || [];
+      drawNotices(d.notices || []);
+      var t = today(), up = [], past = [], yearly = [];
+      EVENTS.forEach(function (e) { if (!e.start) yearly.push(e); else if ((e.end || e.start) < t) past.push(e); else up.push(e); });
+      up.sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+      past.sort(function (a, b) { return a.start > b.start ? -1 : 1; });
+      function row(e) {
+        return '<div class="list-item"><div><div class="t">' + esc(e.title) + (e.hidden ? ' <span class="tag gray">숨김</span>' : "") + '</div><div class="d">' +
+          esc(e.start ? e.start + (e.end && e.end !== e.start ? " ~ " + e.end : "") : (e.usual || "날짜 미정")) + (e.place ? " · " + esc(e.place) : "") + ((e.photos || []).length ? " · 사진 " + e.photos.length + "장" : "") +
+          '</div></div><button class="btn small line" data-edit="' + esc(e.id) + '">고치기</button></div>';
+      }
+      function fill(id, list) { $(id).innerHTML = list.length ? list.map(row).join("") : '<p class="note">없습니다.</p>'; }
+      fill("lsUp", up); fill("lsYearly", yearly); fill("lsPast", past);
+    });
+  }
+
+  /* 입력 폼 */
+  var F = ["id", "title", "start", "end", "time", "category", "usual", "place", "address", "host", "contact", "fee", "summary"];
+  function drawThumbs() {
+    $("posterThumb").innerHTML = poster ? '<div class="th"><img src="' + esc(poster) + '" alt="포스터"><button type="button" data-rmposter aria-label="포스터 빼기">✕</button></div>' : "";
+    $("photoThumbs").innerHTML = photos.map(function (u, i) { return '<div class="th"><img src="' + esc(u) + '" alt="사진 ' + (i + 1) + '"><button type="button" data-rmphoto="' + i + '" aria-label="사진 빼기">✕</button></div>'; }).join("");
+  }
+  function fillForm(e) {
+    e = e || {};
+    F.forEach(function (k) { $("f_" + k).value = e[k] || (k === "category" ? "마을 축제" : ""); });
+    if (e.category && !Array.prototype.some.call($("f_category").options, function (o) { return o.value === e.category; })) {
+      var o = document.createElement("option"); o.textContent = e.category; $("f_category").appendChild(o); $("f_category").value = e.category;
+    }
+    $("f_program").value = (e.program || []).join("\n");
+    $("f_video").value = e.video ? "https://youtu.be/" + e.video : "";
+    $("f_links").value = (e.links || []).map(function (l) { return (l.label || "") + " | " + l.url; }).join("\n");
+    $("f_hidden").checked = !!e.hidden;
+    poster = e.poster || ""; photos = (e.photos || []).slice();
+    $("f_posterFile").value = ""; $("f_photoFiles").value = "";
+    drawThumbs();
+    $("editTitle").textContent = e.id ? "행사 고치기" : "새 행사 올리기";
+    $("delBtn").hidden = !e.id;
+  }
+  function ytId(s) {
+    s = String(s || "").trim(); if (!s) return "";
+    var m = s.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); if (m) return m[1];
+    return /^[A-Za-z0-9_-]{11}$/.test(s) ? s : "";
+  }
+  function readForm() {
+    var e = {};
+    F.forEach(function (k) { e[k] = $("f_" + k).value.trim(); });
+    e.program = $("f_program").value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean);
+    e.video = ytId($("f_video").value);
+    e.links = $("f_links").value.split("\n").map(function (line) {
+      var i = line.lastIndexOf("|"), label = i >= 0 ? line.slice(0, i).trim() : "", url = (i >= 0 ? line.slice(i + 1) : line).trim();
+      return /^https?:\/\//i.test(url) ? { label: label || "바로가기", url: url } : null;
+    }).filter(Boolean);
+    e.hidden = $("f_hidden").checked;
+    e.poster = poster; e.photos = photos.slice();
+    return e;
+  }
+  /* 사진은 긴 변 1600px 로 줄여서 올린다 */
+  function shrink(file) {
+    return new Promise(function (res, rej) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var max = 1600, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error("사진을 읽지 못했습니다: " + file.name)); };
+      img.src = url;
+    });
+  }
+  function upload(file) {
+    return shrink(file).then(function (b64) { return call({ mode: "upload", name: file.name.replace(/\.[^.]+$/, "") + ".jpg", data: b64 }); }).then(function (d) { return d.url; });
+  }
+
+  /* 연결 */
+  if (!API) { $("noApi").hidden = false; $("loginForm").hidden = true; }
+  $("loginForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    KEY = $("key").value;
+    call({ mode: "login" }).then(function () {
+      try { sessionStorage.setItem("sh2-admin", KEY); } catch (e) {}
+      $("key").value = ""; showApp(true); tab("list"); return refresh();
+    }).catch(function (e) { toast(e.message); });
+  });
+  $("logout").addEventListener("click", logout);
+  document.querySelector(".tabs").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-tab]"); if (!b) return;
+    if (b.getAttribute("data-tab") === "edit") fillForm();
+    if (b.getAttribute("data-tab") === "ops") drawOps();
+    tab(b.getAttribute("data-tab"));
+  });
+  document.querySelector('[data-pane="list"]').addEventListener("click", function (e) {
+    var b = e.target.closest("[data-edit]"); if (!b) return;
+    var ev = EVENTS.filter(function (x) { return x.id === b.getAttribute("data-edit"); })[0];
+    if (ev) { fillForm(ev); tab("edit"); }
+  });
+  $("cancelBtn").addEventListener("click", function () { tab("list"); });
+  $("f_posterFile").addEventListener("change", function () {
+    var f = this.files[0]; if (!f) return;
+    toast("포스터를 올리는 중…");
+    upload(f).then(function (u) { poster = u; drawThumbs(); toast("포스터를 올렸습니다"); }).catch(function (e) { toast(e.message); });
+  });
+  $("f_photoFiles").addEventListener("change", function () {
+    var files = Array.prototype.slice.call(this.files); if (!files.length) return;
+    toast("사진 " + files.length + "장을 올리는 중…");
+    files.reduce(function (p, f) { return p.then(function () { return upload(f).then(function (u) { photos.push(u); drawThumbs(); }); }); }, Promise.resolve())
+      .then(function () { toast("사진을 올렸습니다. '저장하기'를 눌러야 반영됩니다"); }).catch(function (e) { toast(e.message); });
+  });
+  $("evForm").addEventListener("click", function (e) {
+    if (e.target.hasAttribute("data-rmposter")) { poster = ""; drawThumbs(); }
+    if (e.target.hasAttribute("data-rmphoto")) { photos.splice(+e.target.getAttribute("data-rmphoto"), 1); drawThumbs(); }
+  });
+  $("evForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var e = readForm();
+    if (e.start && e.end && e.end < e.start) { toast("끝나는 날이 시작하는 날보다 앞입니다"); return; }
+    if (!e.start && e.end) { toast("시작하는 날을 넣어 주세요"); return; }
+    $("saveBtn").disabled = true;
+    call({ mode: "save", event: e }).then(function () { toast("저장했습니다"); tab("list"); return refresh(); })
+      .catch(function (er) { toast(er.message); }).then(function () { $("saveBtn").disabled = false; });
+  });
+  $("delBtn").addEventListener("click", function () {
+    var id = $("f_id").value; if (!id) return;
+    if (!confirm("'" + $("f_title").value + "' 행사를 지울까요? 지우면 되돌릴 수 없습니다.\n(잠시 안 보이게만 하려면 '숨기기'를 쓰세요)")) return;
+    call({ mode: "delete", id: id }).then(function () { toast("지웠습니다"); tab("list"); return refresh(); }).catch(function (e) { toast(e.message); });
+  });
+  /* 행사 운영 */
+  function drawOps() {
+    return call({ mode: "ops_list" }).then(function (d) {
+      $("skeyState").textContent = d.staff_key_set ? "관계자 비밀번호가 정해져 있습니다. 바꾸려면 아래에 새 값을 넣으세요." : "아직 관계자 비밀번호가 없습니다. 정해야 준비 공유 페이지를 쓸 수 있습니다.";
+      var t = today(), list = EVENTS.slice().sort(function (a, b) { return (a.start || "9") > (b.start || "9") ? -1 : 1; });
+      var base = location.href.replace(/[^/]*$/, "");
+      $("opsList").innerHTML = list.map(function (e) {
+        var o = d.ops[e.id] || {}, sv = base + "survey.html?e=" + encodeURIComponent(e.id), id = esc(e.id);
+        return '<div class="opsrow" data-ev="' + id + '"><div class="t" style="font-weight:700">' + esc(e.title) + (e.hidden ? ' <span class="tag gray">숨김</span>' : "") + '</div><div class="d note">' + esc(e.start ? e.start + (e.end && e.end !== e.start ? " ~ " + e.end : "") : (e.usual || "날짜 미정")) + "</div>" +
+          '<ol class="steps"><li class="' + (o.todos ? "on" : "") + '">준비 <small>할 일 ' + (o.todos_done || 0) + "/" + (o.todos || 0) + '</small></li><li class="' + (e.hidden ? "" : "on") + '">홍보 <small>' + (e.hidden ? "숨김" : "공개 중") + '</small></li><li class="' + (o.attendance ? "on" : "") + '">진행 <small>' + (o.attendance ? "참가 " + esc(o.attendance) + "명" : "인원 미입력") + '</small></li><li class="' + (o.survey_open || o.responses ? "on" : "") + '">만족도 조사 <small>' + (o.survey_open ? "받는 중" : "닫힘") + " · 응답 " + (o.responses || 0) + '건</small></li><li class="' + (o.responses || o.todos ? "on" : "") + '">보고서</li></ol>' +
+          '<div class="pair" style="margin-top:12px"><div class="field"><label>참가 인원(명)</label><input inputmode="numeric" data-f="attendance" value="' + esc(o.attendance || "") + '"></div><div class="field"><label>운영 인원(명)</label><input inputmode="numeric" data-f="staff_count" value="' + esc(o.staff_count || "") + '"></div></div>' +
+          '<div class="field"><label>진행 결과 한 줄</label><input data-f="result_note" maxlength="600" value="' + esc(o.result_note || "") + '" placeholder="예) 비가 와서 실내 프로그램으로 바꿔 진행했습니다."></div>' +
+          '<div class="row-actions" style="margin-top:0"><button class="btn small" data-act="save">저장</button>' +
+          '<button class="btn small line" data-act="survey" data-open="' + (o.survey_open ? "1" : "") + '">' + (o.survey_open ? "만족도 조사 닫기" : "만족도 조사 열기") + "</button>" +
+          '<button class="btn small line" data-act="copy" data-url="' + esc(sv) + '">조사 주소 복사</button>' +
+          '<a class="btn small line" href="staff.html?e=' + encodeURIComponent(e.id) + '" target="_blank">준비 공유</a>' +
+          '<a class="btn small line" href="report.html?e=' + encodeURIComponent(e.id) + '" target="_blank">보고서</a></div></div>';
+      }).join("") || '<p class="note">행사가 없습니다.</p>';
+    }).catch(function (e) { toast(e.message); });
+  }
+  $("opsList").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-act]"); if (!b) return;
+    var row = b.closest("[data-ev]"), id = row.getAttribute("data-ev"), act = b.getAttribute("data-act");
+    if (act === "copy") { var u = b.getAttribute("data-url"); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function () { toast("조사 주소를 복사했습니다"); }, function () { prompt("아래 주소를 복사하세요", u); }); return; }
+    var body = { mode: "ops_set", id: id };
+    if (act === "save") row.querySelectorAll("[data-f]").forEach(function (i) { body[i.getAttribute("data-f")] = i.value.trim(); });
+    if (act === "survey") body.survey_open = !b.getAttribute("data-open");
+    call(body).then(function () { toast(act === "survey" ? (body.survey_open ? "만족도 조사를 열었습니다" : "만족도 조사를 닫았습니다") : "저장했습니다"); return drawOps(); }).catch(function (e) { toast(e.message); });
+  });
+  $("skeyForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    call({ mode: "staff_key_set", value: $("sk_new").value }).then(function () { $("sk_new").value = ""; toast("관계자 비밀번호를 정했습니다"); return drawOps(); }).catch(function (e) { toast(e.message); });
+  });
+  function drawNotices(list) {
+    $("noticeList").innerHTML = list.length ? list.map(function (n) {
+      return '<div class="list-item"><div><div class="d">' + esc(n.date) + '</div><div class="t" style="font-weight:400;white-space:pre-line">' + esc(n.text) + '</div></div>' +
+        '<button class="btn small warn" data-ndel="' + esc(n.id) + '">지우기</button></div>';
+    }).join("") : '<p class="note">올린 공지가 없습니다.</p>';
+  }
+  $("noticeForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var text = $("n_text").value.trim();
+    if (!text) { toast("공지 내용을 적어 주세요"); return; }
+    call({ mode: "notice_add", text: text, date: $("n_date").value }).then(function (d) {
+      $("n_text").value = ""; $("n_date").value = ""; drawNotices(d.notices || []); toast("공지를 올렸습니다");
+    }).catch(function (e) { toast(e.message); });
+  });
+  $("noticeList").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-ndel]"); if (!b) return;
+    if (!confirm("이 공지를 지울까요?")) return;
+    call({ mode: "notice_delete", id: b.getAttribute("data-ndel") }).then(function (d) { drawNotices(d.notices || []); toast("지웠습니다"); }).catch(function (e) { toast(e.message); });
+  });
+  /* 같은 창에서 새로고침했을 때 다시 묻지 않는다 */
+  try { KEY = sessionStorage.getItem("sh2-admin") || ""; } catch (e) {}
+  if (KEY && API) call({ mode: "login" }).then(function () { showApp(true); return refresh(); }).catch(function () {});
+})();
+</script>
+</body>
+</html>
