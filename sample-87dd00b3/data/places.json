@@ -69,7 +69,29 @@
       "checked": "2026-11-16",
       "img": "assets/img/pl_geomunoreum.jpg",
       "alt": "전망대에서 내려다본 거문오름 분화구와 오름들",
-      "credit": "위키미디어 공용 Liszt uhm (CC BY-SA 3.0)"
+      "credit": "위키미디어 공용 Liszt uhm (CC BY-SA 3.0)",
+      "photos": [
+        {
+          "src": "assets/img/g_geomun_panorama.jpg",
+          "alt": "거문오름 일대 파노라마"
+        },
+        {
+          "src": "assets/img/g_geomun_observatory.jpg",
+          "alt": "전망대에서 해설을 듣는 탐방객"
+        },
+        {
+          "src": "assets/img/g_geomun_view.jpg",
+          "alt": "전망대에서 본 오름들"
+        },
+        {
+          "src": "assets/img/g_geomun_deck.jpg",
+          "alt": "탐방로 데크 계단"
+        },
+        {
+          "src": "assets/img/g_geomun_kiln.jpg",
+          "alt": "숯가마터"
+        }
+      ]
     },
     {
       "id": "wnhcenter",
@@ -118,7 +140,21 @@
       "checked": "2026-11-16",
       "img": "assets/img/pl_wnhcenter.jpg",
       "alt": "제주세계자연유산센터 건물 외관",
-      "credit": "Korea.net · 위키미디어 공용 (CC BY-SA 2.0)"
+      "credit": "Korea.net · 위키미디어 공용 (CC BY-SA 2.0)",
+      "photos": [
+        {
+          "src": "assets/img/g_center_aerial.jpg",
+          "alt": "하늘에서 본 유산센터"
+        },
+        {
+          "src": "assets/img/g_center_exhibit.jpg",
+          "alt": "상설전시실"
+        },
+        {
+          "src": "assets/img/g_center_entrance.jpg",
+          "alt": "센터 입구와 등재 기념 조형물"
+        }
+      ]
     },
     {
       "id": "yongamgil",
@@ -149,7 +185,21 @@
       "checked": "2026-11-16",
       "img": "assets/img/pl_yongamgil.jpg",
       "alt": "용암길의 삼나무 숲길",
-      "credit": "서울신문"
+      "credit": "서울신문",
+      "photos": [
+        {
+          "src": "assets/img/g_yongam_bridge.jpg",
+          "alt": "용암이 만든 바위 다리"
+        },
+        {
+          "src": "assets/img/g_yongam_forest.jpg",
+          "alt": "고사리 우거진 숲길"
+        },
+        {
+          "src": "assets/img/g_yongam_cedar.jpg",
+          "alt": "삼나무 숲길"
+        }
+      ]
     },
     {
       "id": "bengdwigul",
@@ -188,7 +238,21 @@
       "checked": "2026-11-16",
       "img": "assets/img/pl_bengdwigul.jpg",
       "alt": "덩굴에 덮인 벵뒤굴 입구와 철책",
-      "credit": "서울신문"
+      "credit": "서울신문",
+      "photos": [
+        {
+          "src": "assets/img/g_bengdwi_in1.jpg",
+          "alt": "벵뒤굴 내부"
+        },
+        {
+          "src": "assets/img/g_bengdwi_in2.jpg",
+          "alt": "벵뒤굴 통로"
+        },
+        {
+          "src": "assets/img/g_bengdwi_in3.jpg",
+          "alt": "벵뒤굴 조사 모습"
+        }
+      ]
     },
     {
       "id": "golche",
@@ -395,7 +459,17 @@
       "checked": "2026-11-16",
       "img": "assets/img/pl_budae.jpg",
       "alt": "목장 울타리 너머로 보이는 부대오름",
-      "credit": "쿠키뉴스"
+      "credit": "쿠키뉴스",
+      "photos": [
+        {
+          "src": "assets/img/g_budae_sign.jpg",
+          "alt": "부대오름 표지석"
+        },
+        {
+          "src": "assets/img/g_budae_trail.jpg",
+          "alt": "삼나무 사이 탐방로"
+        }
+      ]
     },
     {
       "id": "minoreum",

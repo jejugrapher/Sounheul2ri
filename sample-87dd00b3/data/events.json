@@ -95,7 +95,8 @@
       ],
       "poster": "assets/img/ev_2026_trekking_poster.jpg",
       "photos": [
-        "assets/img/ev_2026_trekking_1.jpg"
+        "assets/img/ev_2026_trekking_1.jpg",
+        "assets/img/ev_trekking_deck.jpg"
       ],
       "video": "",
       "links": [
@@ -334,7 +335,9 @@
       "program": [],
       "poster": "",
       "photos": [
-        "assets/img/ev_trekking_observatory.jpg"
+        "assets/img/ev_trekking_observatory.jpg",
+        "assets/img/ev_trekking_deck.jpg",
+        "assets/img/ev_trekking_cedar.jpg"
       ],
       "video": "",
       "links": [],
