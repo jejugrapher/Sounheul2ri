@@ -71,7 +71,18 @@
           if (!d || !d.ok) throw new Error("bad");
           window.SH2_NOTICE = d.notice || "";
           window.SH2_NOTICES = d.notices || null;
-          return d.events || [];
+          var evs = d.events || [];
+          /* 저장소의 행사에 포스터·사진·영상 칸이 비어 있으면, 사이트에 함께 올린 목록의 같은 행사 값으로 채운다 */
+          return local().then(function (base) {
+            var by = {}; base.forEach(function (b) { by[b.id] = b; });
+            evs.forEach(function (e) {
+              var b = by[e.id]; if (!b) return;
+              if (!e.video && b.video) e.video = b.video;
+              if (!e.poster && b.poster) e.poster = b.poster;
+              if (!(e.photos || []).length && (b.photos || []).length) e.photos = b.photos;
+            });
+            return evs;
+          }, function () { return evs; });
         }).catch(local)
       : local();
     return p.then(function (list) {
