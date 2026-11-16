@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#1C3A2C">
-<link rel="stylesheet" href="assets/css/site.css?v=20261117a">
+<link rel="stylesheet" href="assets/css/site.css?v=20261117b">
 </head>
 <body>
 <main id="main">
@@ -41,15 +41,23 @@
   <p class="lead" id="histLead"></p>
   <div class="hist" id="hist" style="margin-top:18px"></div>
 </div></section>
+<section class="alt" id="story" hidden><div class="wrap">
+  <p class="eyebrow">Old tale</p><h2 id="stTitle"></h2>
+  <p class="lead" id="stLead"></p>
+  <div class="two story" style="margin-top:22px">
+    <div><div class="video" id="stVideo"></div><p class="note" id="stCredit" style="margin-top:10px"></p></div>
+    <div class="prose" id="stText"></div>
+  </div>
+</div></section>
 <section class="alt"><div class="wrap">
   <p class="eyebrow">Contact</p><h2>마을회</h2>
   <table class="facts" id="contact" style="margin-top:18px;max-width:640px"></table>
   <div class="btn-row"><a class="btn" href="visit.html">오시는 길</a></div>
 </div></section>
 </main>
-<script src="assets/js/config.js?v=20261117a"></script>
-<script src="assets/js/common.js?v=20261117a"></script>
-<script src="assets/js/yt-nocaptions.js?v=20261117a" defer></script>
+<script src="assets/js/config.js?v=20261117b"></script>
+<script src="assets/js/common.js?v=20261117b"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261117b" defer></script>
 <script>
 SH2.init(function (site) {
   var E = SH2.esc;
@@ -73,6 +81,17 @@ SH2.init(function (site) {
     SH2.el("histBlock").hidden = false;
     SH2.el("histLead").textContent = site.historyNote || "";
     SH2.el("hist").innerHTML = '<ul>' + site.history.map(function (h) { return '<li><span class="when">' + E(h.y) + "</span><span>" + E(h.t) + "</span></li>"; }).join("") + "</ul>";
+  }
+  var st = (site.stories || []).filter(function (x) { return x && x.video; })[0];
+  if (st) {
+    SH2.el("story").hidden = false;
+    SH2.el("stTitle").textContent = st.title;
+    SH2.el("stLead").textContent = st.lead || "";
+    SH2.el("stVideo").innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(st.video) + '?cc_load_policy=0&enablejsapi=1" title="' + E(st.title) + '" allowfullscreen loading="lazy"></iframe>';
+    SH2.el("stCredit").textContent = st.credit || "";
+    var ssrc = (st.src || []).map(function (x) { return '<a href="' + E(SH2.safeUrl(x.url)) + '" target="_blank" rel="noopener">' + E(x.label) + "</a>"; }).join(", ");
+    SH2.el("stText").innerHTML = (st.text || []).map(function (t) { return "<p>" + E(t) + "</p>"; }).join("") + (ssrc ? '<p class="src">자료: ' + ssrc + "</p>" : "");
+    if (location.hash === "#story") SH2.el("story").scrollIntoView();
   }
   var ap = site.aboutPhoto;
   if (ap && SH2.safeUrl(ap.src)) SH2.el("about").insertAdjacentHTML("afterbegin", '<figure class="place-pic" style="margin-bottom:22px"><img src="' + E(SH2.safeUrl(ap.src)) + '" alt="' + E(ap.alt || "") + '">' + (ap.credit ? "<figcaption>사진: " + E(ap.credit) + "</figcaption>" : "") + "</figure>");
