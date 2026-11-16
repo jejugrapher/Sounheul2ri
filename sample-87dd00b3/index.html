@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#1C3A2C">
-<link rel="stylesheet" href="assets/css/site.css?v=20261116t">
+<link rel="stylesheet" href="assets/css/site.css?v=20261117a">
 </head>
 <body>
 <main id="main">
@@ -64,9 +64,9 @@
   <ul class="facts recent" id="recent" style="display:block"></ul>
 </div></section>
 </main>
-<script src="assets/js/config.js?v=20261116t"></script>
-<script src="assets/js/common.js?v=20261116t"></script>
-<script src="assets/js/yt-nocaptions.js?v=20261116t" defer></script>
+<script src="assets/js/config.js?v=20261117a"></script>
+<script src="assets/js/common.js?v=20261117a"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261117a" defer></script>
 <script>
 SH2.init(function (site) {
   var E = SH2.esc;
@@ -105,7 +105,7 @@ SH2.init(function (site) {
     if (s.past.length) {
       SH2.el("recBlock").hidden = false;
       SH2.el("recent").innerHTML = s.past.slice(0, 5).map(function (e) {
-        return '<li><span class="when">' + E(e.start.slice(0, 4) + ". " + SH2.md(e.start)) + '</span><a href="archive.html#' + E(e.id) + '">' + E(e.title) + "</a></li>";
+        return '<li><span class="when">' + E(e.start.slice(0, 4) + ". " + SH2.md(e.start)) + '</span><a href="' + E(SH2.eventUrl(e)) + '">' + E(e.title) + "</a></li>";
       }).join("");
     }
   });

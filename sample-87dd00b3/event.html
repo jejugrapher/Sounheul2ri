@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>행사 | 선흘2리</title>
+<meta name="description" content="선흘2리와 거문오름 일대에서 열리는 행사의 일정·장소·프로그램·사진·영상 안내.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="행사 | 선흘2리">
+<meta property="og:description" content="선흘2리와 거문오름 일대에서 열리는 행사의 일정·장소·프로그램·사진·영상 안내.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta property="og:image" content="assets/img/og_village.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1C3A2C">
+<link rel="stylesheet" href="assets/css/site.css?v=20261117a">
+</head>
+<body>
+<main id="main">
+<div class="hero ev-hero" id="evHero">
+  <svg class="ridge" viewBox="0 0 1440 420" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 300 C160 250 260 180 380 170 C470 162 520 215 620 222 C760 232 820 120 960 112 C1080 106 1150 200 1260 214 C1340 224 1400 205 1440 196 L1440 420 L0 420Z" fill="#2F5E3A" opacity=".55"/>
+    <path d="M0 350 C140 318 240 262 360 268 C480 274 560 330 700 322 C860 312 940 238 1080 244 C1220 250 1320 306 1440 290 L1440 420 L0 420Z" fill="#3E7449" opacity=".6"/>
+    <path d="M0 392 C200 360 380 372 560 384 C760 398 940 352 1120 362 C1260 370 1360 392 1440 384 L1440 420 L0 420Z" fill="#6B8F5A" opacity=".55"/>
+  </svg>
+  <div class="wrap hero-in">
+    <a class="ev-back" id="evBack" href="events.html">‹ 행사 안내</a>
+    <div class="tags" id="evTags"></div>
+    <h1 id="evTitle"></h1>
+    <p class="ev-when" id="evWhen"></p>
+    <p class="ev-place" id="evPlace"></p>
+    <div class="btn-row" id="evActions"></div>
+  </div>
+</div>
+<nav class="ev-nav" id="evNav" aria-label="이 행사 안에서 이동" hidden><div class="wrap"></div></nav>
+<div id="evBody"></div>
+<section class="alt" id="evMore" hidden><div class="wrap">
+  <div class="sec-head"><div><p class="eyebrow">More</p><h2>다른 행사</h2></div><a class="more" id="evMoreLink" href="events.html">전체 행사 보기 →</a></div>
+  <div class="grid" id="evMoreGrid"></div>
+</div></section>
+</main>
+<script src="assets/js/config.js?v=20261117a"></script>
+<script src="assets/js/common.js?v=20261117a"></script>
+<script src="assets/js/yt-nocaptions.js?v=20261117a" defer></script>
+<script>
+SH2.init(function () {
+  var E = SH2.esc, U = SH2.safeUrl;
+  var id = new URLSearchParams(location.search).get("e") || decodeURIComponent(location.hash.slice(1));
+  SH2.loadEvents().then(function (list) {
+    var ev = list.filter(function (e) { return e.id === id; })[0];
+    var body = SH2.el("evBody");
+    if (!ev) {
+      SH2.el("evTitle").textContent = "행사를 찾을 수 없습니다";
+      SH2.el("evWhen").textContent = "주소가 바뀌었거나 내려간 행사입니다.";
+      SH2.el("evActions").innerHTML = '<a class="btn" href="events.html">행사 안내</a><a class="btn line" href="archive.html">지난 행사</a>';
+      return;
+    }
+    var past = SH2.isPast(ev), listPage = past ? "archive.html" : "events.html";
+    document.title = ev.title + " | 선흘2리";
+    var back = SH2.el("evBack"); back.href = listPage; back.textContent = past ? "‹ 지난 행사" : "‹ 행사 안내";
+    var cur = document.querySelector('.nav .menu a[href="' + listPage + '"]'); if (cur) cur.setAttribute("aria-current", "page");
+    var photos = (ev.photos || []).map(U).filter(Boolean), poster = U(ev.poster);
+    var bg = photos[0] || poster;
+    if (bg) {
+      var h = SH2.el("evHero"), im = document.createElement("img");
+      im.className = "bg"; im.src = bg; im.alt = ""; im.setAttribute("fetchpriority", "high");
+      h.insertBefore(im, h.firstChild); h.classList.add("photo");
+    }
+    SH2.el("evTags").innerHTML = SH2.statusTag(ev) + SH2.catTag(ev);
+    SH2.el("evTitle").textContent = ev.title;
+    SH2.el("evWhen").textContent = SH2.fmtRange(ev) + (ev.time ? " · " + ev.time : "");
+    SH2.el("evPlace").textContent = ev.place || "";
+
+    var secs = [], n = 0;
+    function sec(key, label, eyebrow, title, html) {
+      secs.push([key, label]);
+      return '<section id="' + key + '" class="ev-sec' + (n++ % 2 ? " alt" : "") + '"><div class="wrap"><p class="eyebrow">' + eyebrow + "</p><h2>" + title + "</h2>" + html + "</div></section>";
+    }
+    var tel = /^[0-9\-]+$/.test(ev.contact || "") ? ev.contact : "";
+    function facts(rows) {
+      return '<table class="facts">' + rows.filter(function (r) { return r[1]; }).map(function (r) {
+        return "<tr><th>" + r[0] + "</th><td>" + (r[0] === "문의" && tel ? '<a href="tel:' + E(tel) + '">' + E(tel) + "</a>" : E(r[1])) + "</td></tr>";
+      }).join("") + "</table>";
+    }
+    var out = "";
+    /* 소개 */
+    var links = (ev.links || []).filter(function (l) { return U(l.url); });
+    out += sec("intro", "소개", "About", "행사 소개",
+      '<div class="two ev-intro"><div>' +
+      (ev.summary ? '<p class="ev-summary">' + E(ev.summary) + "</p>" : "") +
+      facts([["일시", SH2.fmtRange(ev) + (ev.time ? " · " + ev.time : "")], ["장소", ev.place], ["주소", ev.address], ["주최", ev.host], ["참가비", ev.fee], ["문의", ev.contact]]) +
+      (links.length ? '<p class="src" style="margin-top:12px">관련 글: ' + links.map(function (l) { return '<a href="' + E(U(l.url)) + '" target="_blank" rel="noopener">' + E(l.label || "바로가기") + "</a>"; }).join(" · ") + "</p>" : "") +
+      "</div>" +
+      (poster ? '<div data-zoom-group><a class="zoom ev-poster" href="' + E(poster) + '"><img src="' + E(poster) + '" alt="' + E(ev.title) + ' 포스터"></a></div>'
+        : (photos[1] || photos[0] ? '<div data-zoom-group><a class="zoom ev-poster wide" href="' + E(photos[1] || photos[0]) + '"><img src="' + E(photos[1] || photos[0]) + '" alt="' + E(ev.title) + ' 사진"></a></div>' : "")) +
+      "</div>");
+    /* 프로그램 */
+    if ((ev.program || []).length) out += sec("program", "프로그램", "Program", "프로그램",
+      '<ol class="ev-prog">' + ev.program.map(function (p) { return "<li><span>" + E(p) + "</span></li>"; }).join("") + "</ol>");
+    /* 영상 */
+    if (ev.video) out += sec("video", "영상", "Film", "영상으로 보기",
+      '<div class="video ev-video"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ev.video) + '?cc_load_policy=0&enablejsapi=1" title="' + E(ev.title) + '" allowfullscreen loading="lazy"></iframe></div>');
+    /* 사진 */
+    if (photos.length) out += sec("photos", "사진", "Photos", "사진",
+      (photos.some(function (u) { return /\/fl_/.test(u); }) ? '<p class="note">사진 가운데 일부는 AI 로 그린 예시 그림입니다.</p>' : "") +
+      '<div class="photos ev-photos" data-zoom-group>' + photos.map(function (u, i) { return '<a class="zoom" href="' + E(u) + '"><img src="' + E(u) + '" alt="' + E(ev.title) + " 사진 " + (i + 1) + '" loading="lazy"></a>'; }).join("") + "</div>");
+    /* 참가 안내 — 다가오는 행사·해마다 여는 행사 */
+    if (!past) out += sec("join", "참가 안내", "Join", "참가 안내",
+      '<div class="ev-join">' + facts([["참가비", ev.fee], ["문의", ev.contact], ["주최", ev.host]]) +
+      '<div class="btn-row">' + (tel ? '<a class="btn" href="tel:' + E(tel) + '">전화로 문의하기</a>' : "") +
+      links.map(function (l) { return '<a class="btn line" href="' + E(U(l.url)) + '" target="_blank" rel="noopener">' + E(l.label || "바로가기") + "</a>"; }).join("") + "</div></div>");
+    /* 후기 — 만족도 조사가 열려 있을 때 */
+    if (ev.survey_open) out += sec("review", "후기", "Review", "참가 후기 남기기",
+      '<p class="lead">행사에 다녀가셨다면 몇 가지 물음에 답해 주세요. 이름과 연락처는 받지 않습니다.</p><div class="btn-row"><a class="btn" href="survey.html?e=' + encodeURIComponent(ev.id) + '">후기 남기러 가기</a></div>');
+    /* 오시는 길 */
+    if (ev.address || ev.place) {
+      var q = encodeURIComponent(ev.address || ev.place);
+      out += sec("way", "오시는 길", "Visit", "오시는 길",
+        '<p class="lead">' + E(ev.place || "") + (ev.address ? (ev.place ? " · " : "") + E(ev.address) : "") + '</p><div class="btn-row">' +
+        '<a class="btn small" target="_blank" rel="noopener" href="https://map.kakao.com/?q=' + q + '">카카오맵에서 보기</a>' +
+        '<a class="btn small line" target="_blank" rel="noopener" href="https://map.naver.com/p/search/' + q + '">네이버 지도에서 보기</a>' +
+        '<a class="btn small line" href="visit.html">마을 오시는 길</a></div>');
+    }
+    body.innerHTML = out;
+
+    SH2.el("evActions").innerHTML =
+      (!past && tel ? '<a class="btn" href="#join">참가 안내</a>' : "") +
+      (ev.video ? '<a class="btn' + (!past && tel ? " line" : "") + '" href="#video">영상 보기</a>' : "") +
+      (ev.survey_open ? '<a class="btn line" href="survey.html?e=' + encodeURIComponent(ev.id) + '">후기 남기기</a>' : "") +
+      '<button class="btn line" id="evShare">공유하기</button>';
+    SH2.el("evShare").addEventListener("click", function () { SH2.shareEvent(ev); });
+
+    var nav = SH2.el("evNav");
+    nav.firstElementChild.innerHTML = secs.map(function (s) { return '<a href="#' + s[0] + '">' + s[1] + "</a>"; }).join("");
+    nav.hidden = false;
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (x) {
+          if (!x.isIntersecting) return;
+          nav.querySelectorAll("a").forEach(function (a) {
+            var on = a.getAttribute("href") === "#" + x.target.id;
+            if (on) { a.setAttribute("aria-current", "true"); } else a.removeAttribute("aria-current");
+          });
+        });
+      }, { rootMargin: "-45% 0px -50% 0px" });
+      body.querySelectorAll("section").forEach(function (s) { io.observe(s); });
+    }
+
+    /* 다른 행사 — 같은 갈래(다가오는/지난) 가운데 가까운 것부터 */
+    var s = SH2.splitEvents(list);
+    var pool = (past ? s.past : s.upcoming.concat(s.yearly)).filter(function (e) { return e.id !== ev.id; });
+    if (pool.length < 3) pool = pool.concat((past ? s.upcoming.concat(s.yearly) : s.past).filter(function (e) { return e.id !== ev.id; }));
+    if (pool.length) {
+      SH2.el("evMore").hidden = false;
+      SH2.el("evMoreLink").href = listPage;
+      SH2.el("evMoreGrid").innerHTML = pool.slice(0, 3).map(function (e) { return SH2.eventCard(e); }).join("");
+      SH2.bindEvents(SH2.el("evMore"), list.filter(function (e) { return e.id !== ev.id; }));
+    }
+    if (location.hash && location.hash.length > 1) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+  });
+});
+</script>
+</body>
+</html>

@@ -121,67 +121,89 @@
     if (isPast(ev)) return '<span class="tag done">지난 행사</span>';
     return '<span class="tag upcoming">' + esc(dday(ev)) + "</span>";
   }
+  function eventUrl(ev) { return "event.html?e=" + encodeURIComponent(ev.id || ev); }
   function eventCard(ev) {
     var pic = safeUrl((ev.photos || [])[0]) || safeUrl(ev.poster);
     var thumb = pic
       ? '<div class="thumb"><img src="' + esc(pic) + '" alt="" loading="lazy">' + (CFG.sampleLabels !== false && /\/fl_/.test(pic) ? '<span class="sample">예시 그림(AI 생성)</span>' : "") + "</div>"
       : '<div class="thumb plain">' + RIDGE + "<b>" + (ev.start ? "<small>" + esc(ev.start.slice(0, 4)) + "</small>" + esc(md(ev.start)) + (ev.end && ev.end !== ev.start ? " – " + esc(md(ev.end)) : "") : esc(ev.usual || "해마다")) + "</b></div>";
-    return '<article class="card" data-open="' + esc(ev.id) + '" role="button" tabindex="0">' + thumb +
+    return '<article class="card linked">' + thumb +
       '<div class="body">' +
       '<div class="tags">' + statusTag(ev) + catTag(ev) + "</div>" +
       '<span class="when">' + esc(fmtShort(ev)) + "</span>" +
-      "<h3>" + esc(ev.title) + "</h3>" +
+      '<h3><a class="stretch" href="' + esc(eventUrl(ev)) + '">' + esc(ev.title) + "</a></h3>" +
       (ev.place ? '<span class="meta">' + esc(ev.place) + "</span>" : "") +
-      '<div class="card-foot"><span class="more">자세히 보기 →</span>' +
+      '<div class="card-foot"><span class="more" aria-hidden="true">행사 페이지 보기 →</span>' +
       '<button class="share-btn" data-share="' + esc(ev.id) + '">공유</button></div>' +
       "</div></article>";
   }
-  function eventDetail(ev) {
-    var h = '<button class="x" data-close aria-label="닫기">✕</button>';
-    h += '<div class="tags">' + statusTag(ev) + catTag(ev) + "</div>";
-    h += "<h2>" + esc(ev.title) + "</h2>";
-    h += '<p class="when" style="font-size:1rem">' + esc(fmtRange(ev)) + (ev.time ? " · " + esc(ev.time) : "") + "</p>";
-    if (safeUrl(ev.poster)) h += '<img class="poster" src="' + esc(safeUrl(ev.poster)) + '" alt="' + esc(ev.title) + ' 포스터">';
-    h += '<table class="facts" style="margin:14px 0">';
-    [["장소", ev.place], ["주소", ev.address], ["주최", ev.host], ["참가비", ev.fee], ["문의", ev.contact]].forEach(function (r) {
-      if (r[1]) h += "<tr><th>" + r[0] + "</th><td>" + (r[0] === "문의" && /^[0-9\-]+$/.test(r[1]) ? '<a href="tel:' + esc(r[1]) + '">' + esc(r[1]) + "</a>" : esc(r[1])) + "</td></tr>";
-    });
-    h += "</table>";
-    if (ev.summary) h += "<p>" + esc(ev.summary) + "</p>";
-    if ((ev.program || []).length) h += '<h3 style="margin-top:14px">프로그램</h3><ul class="prog">' + ev.program.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>";
-    if (ev.video) h += '<div class="video" style="margin-top:14px"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ev.video) + '?cc_load_policy=0&enablejsapi=1" title="' + esc(ev.title) + '" allowfullscreen loading="lazy"></iframe></div>';
-    var ph = (ev.photos || []).map(safeUrl).filter(Boolean);
-    if (ph.some(function (u) { return /\/fl_/.test(u); })) h += '<p class="note" style="margin-top:12px">아래 사진 가운데 일부는 AI 로 그린 예시 그림입니다.</p>';
-    if (ph.length) h += '<div class="photos" style="margin-top:14px">' + ph.map(function (u) { return '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + esc(ev.title) + ' 사진" loading="lazy"></a>'; }).join("") + "</div>";
-    var links = (ev.links || []).filter(function (l) { return safeUrl(l.url); });
-    if (links.length) h += '<p class="src" style="margin-top:14px">관련 글: ' + links.map(function (l) { return '<a href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener">' + esc(l.label || "바로가기") + "</a>"; }).join(" · ") + "</p>";
-    h += '<div class="row-actions" style="margin-top:16px">' + (ev.survey_open ? '<a class="btn" href="survey.html?e=' + encodeURIComponent(ev.id) + '">만족도 조사 참여하기</a>' : "") + '<button class="btn line" data-share="' + esc(ev.id) + '">이 행사 공유하기</button></div>';
-    return h;
+
+  /* 사진 크게 보기 — 화면 아무 곳이나 누르거나, 뒤로 가기·Esc 로 닫힌다. 새 창을 열지 않는다 */
+  var lb, lbItems = [], lbAt = 0, lbPushed = false, lbFocus;
+  function lbDraw() {
+    var it = lbItems[lbAt];
+    lb.querySelector("img").src = it.src;
+    lb.querySelector("img").alt = it.alt || "";
+    lb.querySelector(".lb-cap").textContent = (it.alt || "") + (lbItems.length > 1 ? "  " + (lbAt + 1) + " / " + lbItems.length : "");
+    lb.classList.toggle("one", lbItems.length < 2);
   }
-  var modal, lastFocus;
-  function openModal(html) {
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.className = "modal";
-      modal.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-label="행사 안내" tabindex="-1"></div>';
-      document.body.appendChild(modal);
-      modal.addEventListener("click", function (e) {
-        if (e.target === modal || e.target.hasAttribute("data-close")) closeModal();
+  function lbStep(n) { lbAt = (lbAt + n + lbItems.length) % lbItems.length; lbDraw(); }
+  function closeLightbox(fromBack) {
+    if (!lb || !lb.classList.contains("open")) return;
+    lb.classList.remove("open");
+    document.documentElement.classList.remove("lb-on");
+    lb.querySelector("img").removeAttribute("src");
+    var pushed = lbPushed; lbPushed = false;
+    if (pushed && !fromBack) history.back();
+    if (lbFocus && lbFocus.focus) { try { lbFocus.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function openLightbox(items, at) {
+    if (!items.length) return;
+    if (!lb) {
+      lb = document.createElement("div");
+      lb.className = "lb";
+      lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true"); lb.setAttribute("aria-label", "사진 크게 보기"); lb.tabIndex = -1;
+      lb.innerHTML = '<button class="lb-x" data-lb="close" aria-label="닫기">✕</button>' +
+        '<button class="lb-nav prev" data-lb="prev" aria-label="이전 사진">‹</button>' +
+        '<figure><img alt=""><figcaption class="lb-cap"></figcaption></figure>' +
+        '<button class="lb-nav next" data-lb="next" aria-label="다음 사진">›</button>' +
+        '<p class="lb-hint">화면을 누르면 닫힙니다</p>';
+      document.body.appendChild(lb);
+      lb.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-lb]"), k = b && b.getAttribute("data-lb");
+        if (k === "prev") lbStep(-1); else if (k === "next") lbStep(1); else closeLightbox();
       });
-      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+      var x0 = null;
+      lb.addEventListener("touchstart", function (e) { x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+      lb.addEventListener("touchend", function (e) {
+        if (x0 == null || lbItems.length < 2) return;
+        var dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) > 50) { e.preventDefault(); lbStep(dx < 0 ? 1 : -1); }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (!lb.classList.contains("open")) return;
+        if (e.key === "Escape") closeLightbox();
+        else if (e.key === "ArrowLeft" && lbItems.length > 1) lbStep(-1);
+        else if (e.key === "ArrowRight" && lbItems.length > 1) lbStep(1);
+      });
+      window.addEventListener("popstate", function () { closeLightbox(true); });
     }
-    if (!modal.classList.contains("open")) lastFocus = document.activeElement;
-    modal.firstChild.innerHTML = html;
-    modal.classList.add("open");
-    modal.firstChild.scrollTop = 0;
-    try { modal.firstChild.focus({ preventScroll: true }); } catch (e) {}
+    lbItems = items; lbAt = at || 0; lbFocus = document.activeElement;
+    lbDraw();
+    lb.classList.add("open");
+    document.documentElement.classList.add("lb-on");
+    try { history.pushState({ sh2lb: 1 }, ""); lbPushed = true; } catch (e) { lbPushed = false; }
+    try { lb.focus({ preventScroll: true }); } catch (e) {}
   }
-  function closeModal() {
-    if (!modal || !modal.classList.contains("open")) return;
-    modal.classList.remove("open");
-    modal.firstChild.innerHTML = "";  /* 영상이 계속 재생되지 않게 비운다 */
-    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
-  }
+  /* <a class="zoom" href="큰 사진"><img></a> 를 누르면 크게 보기. 같은 묶음(.photos 등) 안의 사진은 넘겨 볼 수 있다 */
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.zoom");
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    var box = a.closest("[data-zoom-group]") || a.parentNode;
+    var all = [].slice.call(box.querySelectorAll("a.zoom"));
+    openLightbox(all.map(function (x) { var im = x.querySelector("img"); return { src: x.getAttribute("href"), alt: (im && im.alt) || "" }; }), Math.max(0, all.indexOf(a)));
+  });
 
   function toast(msg) {
     var t = el("toast");
@@ -196,31 +218,19 @@
       navigator.clipboard.writeText(url).then(function () { toast("주소를 복사했습니다"); }, function () { prompt("아래 주소를 복사하세요", url); });
     } else { prompt("아래 주소를 복사하세요", url); }
   }
-  /* 카드의 자세히·공유 단추 연결 */
+  /* 카드의 공유 단추 연결. 옛 주소(…#행사)로 들어오면 그 행사의 페이지로 보낸다 */
+  function shareEvent(ev) {
+    share(ev.title + " — 선흘2리", location.origin + location.pathname.replace(/[^/]*$/, "") + eventUrl(ev));
+  }
   function bindEvents(root, list) {
     var byId = {};
     list.forEach(function (e) { byId[e.id] = e; });
     root.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-open],[data-share]");
-      if (!b) return;
-      var id = b.getAttribute("data-open") || b.getAttribute("data-share");
-      var ev = byId[id];
-      if (!ev) return;
-      if (b.hasAttribute("data-open")) { openModal(eventDetail(ev)); history.replaceState(null, "", "#" + id); }
-      else share(ev.title + " — 선흘2리", location.origin + location.pathname.replace(/[^/]*$/, "") + (isPast(ev) ? "archive.html" : "events.html") + "#" + id);
-    });
-    document.addEventListener("click", function (e) {
-      var b = e.target.closest(".modal [data-share]");
-      if (b && byId[b.getAttribute("data-share")]) {
-        var ev = byId[b.getAttribute("data-share")];
-        share(ev.title + " — 선흘2리", location.origin + location.pathname + "#" + ev.id);
-      }
-    });
-    root.addEventListener("keydown", function (e) {
-      if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches('[data-open][role="button"]')) { e.preventDefault(); e.target.click(); }
+      var b = e.target.closest("[data-share]");
+      if (b && byId[b.getAttribute("data-share")]) { e.preventDefault(); shareEvent(byId[b.getAttribute("data-share")]); }
     });
     var h = decodeURIComponent(location.hash.slice(1));
-    if (h && byId[h]) openModal(eventDetail(byId[h]));
+    if (h && byId[h]) location.replace(eventUrl(byId[h]));
   }
 
   /* 머리말·꼬리말 */
@@ -277,7 +287,7 @@
   window.SH2 = {
     cfg: CFG, esc: esc, safeUrl: safeUrl, el: el, getJSON: getJSON, init: init,
     todayISO: todayISO, parse: parse, fmtDate: fmtDate, fmtRange: fmtRange, fmtShort: fmtShort, md: md, isPast: isPast, isOngoing: isOngoing, dday: dday,
-    loadEvents: loadEvents, splitEvents: splitEvents, eventCard: eventCard, eventDetail: eventDetail,
-    openModal: openModal, closeModal: closeModal, toast: toast, share: share, bindEvents: bindEvents
+    loadEvents: loadEvents, splitEvents: splitEvents, eventCard: eventCard, eventUrl: eventUrl, statusTag: statusTag, catTag: catTag,
+    openLightbox: openLightbox, closeLightbox: closeLightbox, toast: toast, share: share, shareEvent: shareEvent, bindEvents: bindEvents
   };
 })();
