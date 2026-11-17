@@ -7,7 +7,8 @@
     ["nature.html", "자연·관광지"],
     ["events.html", "행사 안내"],
     ["archive.html", "지난 행사"],
-    ["visit.html", "오시는 길"]
+    ["visit.html", "오시는 길"],
+    ["village-map/", "마을지도"]
   ];
   var DOW = ["일", "월", "화", "수", "목", "금", "토"];
 
